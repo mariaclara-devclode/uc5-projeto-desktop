@@ -5,8 +5,17 @@ let mainWindow: BrowserWindow | null = null
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
+
+    minWidth: 900,
+    minHeight: 600,
+
+    center: true,
+
+    title: 'Gerenciador de Estoque Comercial',
+
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
