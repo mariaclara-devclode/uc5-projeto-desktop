@@ -1,5 +1,11 @@
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import path from 'path'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const databaseUrl = process.env.DATABASE_URL
+console.log(databaseUrl)
 
 let mainWindow: BrowserWindow | null = null
 
@@ -103,4 +109,3 @@ app.on('before-quit', () => {
 ipcMain.handle('canal-ping', async () => {
   return 'pong do processo principal!'
 })
-
