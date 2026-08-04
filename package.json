@@ -1,5 +1,5 @@
 {
-  "name": "meu-app-desktop",
+  "name": "gerenciador-estoque-comercial",
   "version": "1.0.0",
   "main": "dist-electron/main.js",
   "description": "Projeto base Electron + Vite + TypeScript com IPC seguro e empacotamento por usuário",
@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "@types/pg": "^8.20.3",
     "electron": "^42.6.0",
     "electron-builder": "^26.15.3",
     "typescript": "^5.4.5",
@@ -22,8 +23,8 @@
     "vite-plugin-electron-renderer": "^1.0.0"
   },
   "build": {
-    "appId": "com.example.meuapp",
-    "productName": "MeuApp",
+    "appId":"com.gerenciadorestoquecomercial.app",
+    "productName": "Gerenciador de Estoque Comercial",
     "win": {
       "target": "nsis",
       "requestedExecutionLevel": "asInvoker"
