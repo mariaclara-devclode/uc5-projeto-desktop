@@ -9,7 +9,9 @@ declare global {
         {
           id: number;
           nome: string;
-          preco: number;
+          codigo_barras: string;
+          preco_venda: number;
+          id_categoria: number;
         }[]
       >;
     };
