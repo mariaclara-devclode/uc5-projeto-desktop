@@ -11,44 +11,89 @@ appElement.innerHTML = `
   <p id="resposta">Aguardando interação...</p>
 
   <h2>Produtos</h2>
-  <ul id="lista-produtos"></ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Código de Barras</th>
+        <th>Preço de Venda</th>
+        <th>Categoria</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabela-produtos">
+    </tbody>
+  </table>
 `
 
-const button = document.getElementById('btn-ping') as HTMLButtonElement
-const resposta = document.getElementById('resposta') as HTMLParagraphElement
+const button =
+  document.getElementById('btn-ping') as HTMLButtonElement
+
+const resposta =
+  document.getElementById('resposta') as HTMLParagraphElement
 
 button.addEventListener('click', async () => {
   resposta.textContent = 'Enviando ping...'
 
   try {
     const retorno = await window.api.ping()
+
     resposta.textContent = `Resposta: ${retorno}`
   } catch (erro) {
     resposta.textContent = 'Erro ao enviar IPC.'
+
     console.error(erro)
   }
 })
 
-const btnProdutos = document.getElementById('btn-produtos') as HTMLButtonElement
-const lista = document.getElementById('lista-produtos') as HTMLUListElement
+
+const btnProdutos =
+  document.getElementById('btn-produtos') as HTMLButtonElement
+
+const tabelaProdutos =
+  document.getElementById('tabela-produtos') as HTMLTableSectionElement
+
 
 btnProdutos.addEventListener('click', async () => {
-  lista.innerHTML = ''
+
+  tabelaProdutos.innerHTML = ''
+
+  resposta.textContent = 'Carregando produtos...'
 
   try {
+
     const produtos = await window.api.listarProdutos()
 
     produtos.forEach((produto) => {
-      const item = document.createElement('li')
 
-      item.textContent = `${produto.id} - ${produto.nome} - R$ ${produto.preco.toFixed(2)}`
+      const linha = document.createElement('tr')
 
-      lista.appendChild(item)
+      linha.innerHTML = `
+        <td>${produto.id}</td>
+        <td>${produto.nome}</td>
+        <td>${produto.codigo_barras}</td>
+        <td>R$ ${produto.preco_venda.toFixed(2)}</td>
+        <td>${produto.id_categoria}</td>
+      `
+
+      tabelaProdutos.appendChild(linha)
+
     })
+
+    resposta.textContent =
+      `${produtos.length} produtos encontrados`
+
   } catch (erro) {
-    resposta.textContent = 'Erro ao listar produtos.'
+
+    resposta.textContent =
+      'Erro ao listar produtos.'
+
     console.error(erro)
+
   }
+
 })
 
 export {}
