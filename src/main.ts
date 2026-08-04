@@ -1,11 +1,12 @@
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import path from 'path'
 import dotenv from 'dotenv'
+import {pool}  from "./db";
 
 dotenv.config()
 
 const databaseUrl = process.env.DATABASE_URL
-console.log(databaseUrl)
+console.log("databaseUrl carregada:", Boolean(databaseUrl))
 
 let mainWindow: BrowserWindow | null = null
 
@@ -62,8 +63,13 @@ function createMenu() {
           type: 'separator'
         },
         {
+
+          label:'sair',
           role: 'quit'
+
         }
+       
+      
       ]
     },
     {
@@ -109,3 +115,25 @@ app.on('before-quit', () => {
 ipcMain.handle('canal-ping', async () => {
   return 'pong do processo principal!'
 })
+
+ipcMain.handle("listar-produtos", async () => {
+  try {
+    const resultado = await pool.query(`
+     select
+        id,
+        nome,
+        preco_venda
+      from produtos
+      order by id 
+    `);
+
+    return resultado.rows.map((produto) => ({
+      id: produto.id,
+      nome: produto.nome,
+      preco: Number(produto.preco_venda),
+    }));
+  } catch (erro) {
+    console.error("Erro ao buscar produtos:", erro);
+    return [];
+  }
+});
