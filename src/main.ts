@@ -116,24 +116,36 @@ ipcMain.handle('canal-ping', async () => {
   return 'pong do processo principal!'
 })
 
-ipcMain.handle("listar-produtos", async () => {
+ipcMain.handle('listar-produtos', async () => {
   try {
+    console.log('Buscando produtos no banco...')
+
     const resultado = await pool.query(`
-     select
+      SELECT
         id,
         nome,
-        preco_venda
-      from produtos
-      order by id 
-    `);
+        codigo_barras,
+        preco_venda,
+        id_categoria
+      FROM produtos
+      ORDER BY id
+    `)
+
+    console.log('Produtos encontrados:', resultado.rows)
 
     return resultado.rows.map((produto) => ({
       id: produto.id,
       nome: produto.nome,
-      preco: Number(produto.preco_venda),
-    }));
+      codigo_barras: produto.codigo_barras,
+      preco_venda: Number(produto.preco_venda),
+      id_categoria: produto.id_categoria
+    }))
+
   } catch (erro) {
-    console.error("Erro ao buscar produtos:", erro);
-    return [];
+
+    console.error('ERRO AO BUSCAR PRODUTOS NO BANCO:')
+    console.error(erro)
+
+    throw erro
   }
-});
+})
