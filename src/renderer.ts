@@ -1,6 +1,7 @@
 import './style.css'
 
-const appElement = document.getElementById('app') as HTMLDivElement
+const appElement =
+  document.getElementById('app') as HTMLDivElement
 
 appElement.innerHTML = `
   <h1>Gerenciador de Estoque Comercial</h1>
@@ -20,6 +21,7 @@ appElement.innerHTML = `
         <th>Código de Barras</th>
         <th>Preço de Venda</th>
         <th>Categoria</th>
+        <th>Estoque</th>
       </tr>
     </thead>
 
@@ -48,13 +50,13 @@ button.addEventListener('click', async () => {
   }
 })
 
-
 const btnProdutos =
   document.getElementById('btn-produtos') as HTMLButtonElement
 
 const tabelaProdutos =
-  document.getElementById('tabela-produtos') as HTMLTableSectionElement
-
+  document.getElementById(
+    'tabela-produtos'
+  ) as HTMLTableSectionElement
 
 btnProdutos.addEventListener('click', async () => {
 
@@ -64,22 +66,31 @@ btnProdutos.addEventListener('click', async () => {
 
   try {
 
-    const produtos = await window.api.listarProdutos()
+    const produtos =
+      await window.api.listarProdutos()
 
     produtos.forEach((produto) => {
 
-      const linha = document.createElement('tr')
+      const linha =
+        document.createElement('tr')
 
       linha.innerHTML = `
         <td>${produto.id}</td>
+
         <td>${produto.nome}</td>
+
         <td>${produto.codigo_barras}</td>
-        <td>R$ ${produto.preco_venda.toFixed(2)}</td>
-        <td>${produto.id_categoria}</td>
+
+        <td>
+          R$ ${produto.preco_venda.toFixed(2)}
+        </td>
+
+        <td>${produto.categoria}</td>
+
+        <td>${produto.estoque}</td>
       `
 
       tabelaProdutos.appendChild(linha)
-
     })
 
     resposta.textContent =
@@ -91,9 +102,7 @@ btnProdutos.addEventListener('click', async () => {
       'Erro ao listar produtos.'
 
     console.error(erro)
-
   }
-
 })
 
 export {}
