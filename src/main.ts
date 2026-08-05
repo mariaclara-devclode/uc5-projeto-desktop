@@ -116,19 +116,42 @@ ipcMain.handle('canal-ping', async () => {
   return 'pong do processo principal!'
 })
 
+
 ipcMain.handle('listar-produtos', async () => {
   try {
     console.log('Buscando produtos no banco...')
 
     const resultado = await pool.query(`
       SELECT
-        id,
-        nome,
-        codigo_barras,
-        preco_venda,
-        id_categoria
+        produtos.id,
+        produtos.nome,
+        produtos.codigo_barras,
+        produtos.preco_venda,
+        categorias.nome AS categoria,
+
+        (
+          SELECT COALESCE(
+            SUM(
+              CASE
+                WHEN movimentacoes.tipo = 'entrada'
+                  THEN movimentacoes.quantidade
+                WHEN movimentacoes.tipo = 'saida'
+                  THEN -movimentacoes.quantidade
+                ELSE 0
+              END
+            ),
+            0
+          )
+          FROM movimentacoes
+          WHERE movimentacoes.id_produto = produtos.id
+        ) AS estoque
+
       FROM produtos
-      ORDER BY id
+
+      INNER JOIN categorias
+        ON produtos.id_categoria = categorias.id
+
+      ORDER BY produtos.id
     `)
 
     console.log('Produtos encontrados:', resultado.rows)
@@ -138,14 +161,76 @@ ipcMain.handle('listar-produtos', async () => {
       nome: produto.nome,
       codigo_barras: produto.codigo_barras,
       preco_venda: Number(produto.preco_venda),
-      id_categoria: produto.id_categoria
+      categoria: produto.categoria,
+      estoque: Number(produto.estoque)
     }))
 
-  } catch (erro) {
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error)
 
-    console.error('ERRO AO BUSCAR PRODUTOS NO BANCO:')
-    console.error(erro)
-
-    throw erro
+    throw error
   }
 })
+
+ipcMain.handle(
+  'registrar-movimentacao',
+  async (
+    _event,
+    movimentacao
+  ) => {
+
+    try {
+
+      console.log(
+        'Registrando movimentação...'
+      )
+
+
+      const resultado = await pool.query(
+
+        `
+        INSERT INTO movimentacoes
+        (
+          id_produto,
+          quantidade,
+          tipo
+        )
+
+        VALUES
+        (
+          $1,
+          $2,
+          $3
+        )
+
+        RETURNING *
+        `,
+
+        [
+          movimentacao.id_produto,
+          movimentacao.quantidade,
+          movimentacao.tipo
+        ]
+
+      )
+
+
+      console.log(
+        'Movimentação registrada:',
+        resultado.rows[0]
+      )
+
+
+      return resultado.rows[0]
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao registrar movimentação:',
+        error
+      )
+
+      throw error
+    }
+  }
+)
