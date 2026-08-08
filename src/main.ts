@@ -23,6 +23,7 @@ function createWindow() {
     title: 'Gerenciador de Estoque Comercial',
 
     show: false,
+
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -32,6 +33,7 @@ function createWindow() {
 
 
   // Se estiver em desenvolvimento, usa a URL do Vite. Em produção, carrega o arquivo compilado.
+
   if (process.env.VITE_DEV_SERVER_URL) {
   mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
   mainWindow.webContents.openDevTools()
@@ -88,14 +90,21 @@ function createMenu() {
   Menu.setApplicationMenu(menu)
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+
+  try {
+    await pool.query('SELECT 1')
+    console.log('Banco conectado com sucesso!')
+  } catch (error) {
+    console.error('Erro ao conectar ao banco:', error)
+  }
+
   createWindow()
   createMenu()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
-
     }
   })
 })
@@ -107,7 +116,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
-  console.log('Até logo!Encerrando o sistema...')
+  console.log('Ate logo!Encerrando o sistema...')
 })
 
 
@@ -123,114 +132,224 @@ ipcMain.handle('listar-produtos', async () => {
 
     const resultado = await pool.query(`
       SELECT
-        produtos.id,
-        produtos.nome,
-        produtos.codigo_barras,
-        produtos.preco_venda,
-        categorias.nome AS categoria,
+        p.id,
+        p.nome,
+        p.codigo_barras,
+        p.preco_venda,
+        c.nome AS categorias,
 
-        (
-          SELECT COALESCE(
+
+        COALESCE(
             SUM(
               CASE
-                WHEN movimentacoes.tipo = 'entrada'
-                  THEN movimentacoes.quantidade
-                WHEN movimentacoes.tipo = 'saida'
-                  THEN -movimentacoes.quantidade
+                WHEN m.tipo = 'entrada' THEN m.quantidade
+                WHEN m.tipo = 'saida' THEN -m.quantidade
                 ELSE 0
               END
             ),
             0
-          )
-          FROM movimentacoes
-          WHERE movimentacoes.id_produto = produtos.id
-        ) AS estoque
+          ) AS  estoque
+          
+          From produtos p
 
-      FROM produtos
+          INNER JOIN categorias c
+            ON p.id_categoria = c.id
 
-      INNER JOIN categorias
-        ON produtos.id_categoria = categorias.id
+           LEFT JOIN movimentacoes m
+            ON p.id = m.id_produto
 
-      ORDER BY produtos.id
-    `)
+          GROUP BY
+             p.id, 
+             p.nome,
+             p.codigo_barras,
+             p.preco_venda,
+             c.nome
 
-    console.log('Produtos encontrados:', resultado.rows)
+          ORDER BY p.id
+
+    `) 
+
+    console.log(
+      'Produtos encontrados:',
+       resultado.rows
+      )
 
     return resultado.rows.map((produto) => ({
-      id: produto.id,
-      nome: produto.nome,
-      codigo_barras: produto.codigo_barras,
+      ...produto,
+
       preco_venda: Number(produto.preco_venda),
-      categoria: produto.categoria,
-      estoque: Number(produto.estoque)
+      
+      estoque: Number(produto.estoque),
+
     }))
 
   } catch (error) {
-    console.error('Erro ao buscar produtos:', error)
+    console.error(
+      'Erro ao buscar produtos:', 
+      error
+    )
 
     throw error
   }
 })
 
 ipcMain.handle(
-  'registrar-movimentacao',
-  async (
-    _event,
-    movimentacao
-  ) => {
-
+  'buscar-produtos',
+  async (_event, termo: string) => {
     try {
-
-      console.log(
-        'Registrando movimentação...'
-      )
-
+      const busca = termo.trim()
 
       const resultado = await pool.query(
-
         `
-        INSERT INTO movimentacoes
-        (
-          id_produto,
-          quantidade,
-          tipo
-        )
+        SELECT
+          p.id,
+          p.nome,
+          p.codigo_barras,
+          p.preco_venda,
+          c.nome AS categoria,
 
-        VALUES
-        (
-          $1,
-          $2,
-          $3
-        )
+          COALESCE(
+            SUM(
+              CASE
+                WHEN m.tipo = 'entrada'
+                  THEN m.quantidade
 
-        RETURNING *
+                WHEN m.tipo = 'saida'
+                  THEN -m.quantidade
+
+                ELSE 0
+              END
+            ),
+            0
+          ) AS estoque
+
+        FROM produtos p
+
+        INNER JOIN categorias c
+          ON p.id_categoria = c.id
+
+        LEFT JOIN movimentacoes m
+          ON p.id = m.id_produto
+
+        WHERE
+          p.nome ILIKE $1
+          OR p.codigo_barras ILIKE $1
+
+        GROUP BY
+          p.id,
+          p.nome,
+          p.codigo_barras,
+          p.preco_venda,
+          c.nome
+
+        ORDER BY p.id
         `,
-
-        [
-          movimentacao.id_produto,
-          movimentacao.quantidade,
-          movimentacao.tipo
-        ]
-
+        [`%${busca}%`]
       )
 
+      return resultado.rows.map((produto)=> ({
+        ...produto,
 
-      console.log(
-        'Movimentação registrada:',
-        resultado.rows[0]
-      )
+        preco_venda: Number(
+          produto.preco_venda
+        ),
+        estoque: Number(
+          produto.estoque
+        ),
+      }))   
+        
+      } catch (error) {
+        console.error(
+          'Erro ao buscar produtos:',
+          error
+        ) 
 
+        throw error
+      }
+    }
+  )
 
-      return resultado.rows[0]
+  ipcMain.handle(
+  'listar-estoque-critico',
+  async () => {
+    try {
+      const resultado = await pool.query(`
+        SELECT
+          p.id,
+          p.nome,
+          p.codigo_barras,
+          p.preco_venda,
+          c.nome AS categoria,
 
+          COALESCE(
+            SUM(
+              CASE
+                WHEN m.tipo = 'entrada'
+                  THEN m.quantidade
+
+                WHEN m.tipo = 'saida'
+                  THEN -m.quantidade
+
+                ELSE 0
+              END
+            ),
+            0
+          ) AS estoque
+
+        FROM produtos p
+
+        INNER JOIN categorias c
+          ON p.id_categoria = c.id
+
+        LEFT JOIN movimentacoes m
+          ON p.id = m.id_produto
+
+        GROUP BY
+          p.id,
+          p.nome,
+          p.codigo_barras,
+          p.preco_venda,
+          c.nome
+
+        HAVING
+          COALESCE(
+            SUM(
+              CASE
+                WHEN m.tipo = 'entrada'
+                  THEN m.quantidade
+
+                WHEN m.tipo = 'saida'
+                  THEN -m.quantidade
+
+                ELSE 0
+              END
+            ),
+            0
+          ) <= 10
+
+        ORDER BY estoque ASC
+      `)
+
+      return resultado.rows.map((produto) => ({
+        ...produto,
+
+        preco_venda: Number(
+          produto.preco_venda
+        ),
+
+        estoque: Number(
+          produto.estoque
+        ),
+      }))
     } catch (error) {
-
       console.error(
-        'Erro ao registrar movimentação:',
+        'Erro ao buscar estoque crítico:',
         error
       )
+
 
       throw error
     }
   }
 )
+

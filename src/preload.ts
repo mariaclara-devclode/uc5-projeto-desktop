@@ -7,18 +7,14 @@ contextBridge.exposeInMainWorld('api', {
   listarProdutos: () =>
     ipcRenderer.invoke('listar-produtos'),
 
-  registrarMovimentacao: (
-    id_produto: number,
-    quantidade: number,
-    tipo: 'entrada' | 'saida'
-  ) =>
+   buscarProdutos: (termo: string) =>
     ipcRenderer.invoke(
-      'registrar-movimentacao',
-      {
-        id_produto,
-        quantidade,
-        tipo
-      }
-    )
+      'buscar-produtos',
+      termo
+    ),
 
+  listarEstoqueCritico: () =>
+    ipcRenderer.invoke(
+      'listar-estoque-critico'
+    ),
 })
