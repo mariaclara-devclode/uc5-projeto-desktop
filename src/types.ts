@@ -17,5 +17,5 @@ export interface Movimentacao {
   id_produto: number;
   quantidade: number;
   tipo: "entrada" | "saida";
-  data: Date;
+  data: string
 }
