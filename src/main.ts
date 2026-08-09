@@ -37,6 +37,7 @@ function createWindow() {
   if (process.env.VITE_DEV_SERVER_URL) {
   mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
   mainWindow.webContents.openDevTools()
+
 } else {
   mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
 }
@@ -50,6 +51,7 @@ function createWindow() {
 
 }
 
+// MENU
 function createMenu() {
   const menu = Menu.buildFromTemplate([
     {
@@ -136,7 +138,7 @@ ipcMain.handle('listar-produtos', async () => {
         p.nome,
         p.codigo_barras,
         p.preco_venda,
-        c.nome AS categorias,
+        c.nome AS categoria,
 
 
         COALESCE(
@@ -353,3 +355,270 @@ ipcMain.handle(
   }
 )
 
+ipcMain.handle('listar-categorias', async () => {
+  try {
+    const resultado = await pool.query(`
+      SELECT
+        id,
+        nome,
+        descricao
+      FROM categorias
+      ORDER BY nome
+    `)
+
+    return resultado.rows
+  } catch (error) {
+    console.error('Erro ao listar categorias:', error)
+
+    throw error
+  }
+})
+
+ipcMain.handle(
+  'cadastrar-categoria',
+  async (_event, categoria: {
+    nome: string
+    descricao: string
+  }) => {
+
+    try {
+      const nome = categoria.nome.trim()
+      const descricao = categoria.descricao.trim()
+
+      if (!nome) {
+        throw new Error('O nome da categoria é obrigatório.')
+      }
+
+      if (!descricao) {
+        throw new Error('A descrição da categoria é obrigatória.')
+      }
+
+      const resultado = await pool.query(
+        `
+        INSERT INTO categorias
+        (nome, descricao)
+        VALUES ($1, $2)
+        RETURNING id, nome, descricao
+        `,
+        [nome, descricao]
+      )
+
+      return resultado.rows[0]
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao cadastrar categoria:',
+        error
+      )
+
+      throw error
+    }
+  }
+)
+
+ipcMain.handle(
+  'cadastrar-produto',
+  async (
+    _event,
+    produto: {
+      nome: string
+      codigo_barras: string
+      preco_venda: number
+      id_categoria: number
+    }
+  ) => {
+
+    try {
+
+      const nome = produto.nome.trim()
+      const codigo = produto.codigo_barras.trim()
+      const preco = Number(produto.preco_venda)
+      const idCategoria = Number(produto.id_categoria)
+
+      if (!nome) {
+        throw new Error(
+          'O nome do produto é obrigatório.'
+        )
+      }
+
+      if (!codigo) {
+        throw new Error(
+          'O código de barras é obrigatório.'
+        )
+      }
+
+      if (preco <= 0) {
+        throw new Error(
+          'O preço deve ser maior que zero.'
+        )
+      }
+
+      if (idCategoria <= 0) {
+        throw new Error(
+          'Selecione uma categoria.'
+        )
+      }
+
+      const resultado = await pool.query(
+        `
+        INSERT INTO produtos
+        (
+          nome,
+          codigo_barras,
+          preco_venda,
+          id_categoria
+        )
+        VALUES ($1, $2, $3, $4)
+        RETURNING
+          id,
+          nome,
+          codigo_barras,
+          preco_venda,
+          id_categoria
+        `,
+        [
+          nome,
+          codigo,
+          preco,
+          idCategoria
+        ]
+      )
+
+      return {
+        ...resultado.rows[0],
+        preco_venda: Number(
+          resultado.rows[0].preco_venda
+        )
+      }
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao cadastrar produto:',
+        error
+      )
+
+      throw error
+    }
+  }
+)
+
+ipcMain.handle(
+  'registrar-movimentacao',
+  async (
+    _event,
+    movimentacao: {
+      id_produto: number
+      quantidade: number
+      tipo: 'entrada' | 'saida'
+    }
+  ) => {
+
+    try {
+
+      const idProduto =
+        Number(movimentacao.id_produto)
+
+      const quantidade =
+        Number(movimentacao.quantidade)
+
+      const tipo =
+        movimentacao.tipo
+
+      if (idProduto <= 0) {
+        throw new Error(
+          'Produto inválido.'
+        )
+      }
+
+      if (quantidade <= 0) {
+        throw new Error(
+          'A quantidade deve ser maior que zero.'
+        )
+      }
+
+      if (
+        tipo !== 'entrada' &&
+        tipo !== 'saida'
+      ) {
+        throw new Error(
+          'Tipo de movimentação inválido.'
+        )
+      }
+
+      if (tipo === 'saida') {
+
+        const estoqueAtual =
+          await pool.query(
+            `
+            SELECT
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN tipo = 'entrada'
+                      THEN quantidade
+                    WHEN tipo = 'saida'
+                      THEN -quantidade
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS estoque
+
+            FROM movimentacoes
+
+            WHERE id_produto = $1
+            `,
+            [idProduto]
+          )
+
+        const estoque =
+          Number(
+            estoqueAtual.rows[0].estoque
+          )
+
+        if (quantidade > estoque) {
+          throw new Error(
+            `Estoque insuficiente. Estoque atual: ${estoque}`
+          )
+        }
+      }
+
+      const resultado =
+        await pool.query(
+          `
+          INSERT INTO movimentacoes
+          (
+            id_produto,
+            quantidade,
+            tipo
+          )
+          VALUES ($1, $2, $3)
+          RETURNING
+            id,
+            id_produto,
+            quantidade,
+            tipo,
+            data
+          `,
+          [
+            idProduto,
+            quantidade,
+            tipo
+          ]
+        )
+
+      return resultado.rows[0]
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao registrar movimentação:',
+        error
+      )
+
+      throw error
+    }
+  }
+)
