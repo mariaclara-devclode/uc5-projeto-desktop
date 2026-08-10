@@ -1,70 +1,139 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import {
+  contextBridge,
+  ipcRenderer,
+} from 'electron'
 
-contextBridge.exposeInMainWorld('api', {
+contextBridge.exposeInMainWorld(
+  'api',
+  {
+    // PING
+    // 
 
-  ping: () => ipcRenderer.invoke('canal-ping'),
+    ping: () =>
+      ipcRenderer.invoke(
+        'canal-ping'
+      ),
 
-  listarProdutos: () =>
-    ipcRenderer.invoke('listar-produtos'),
+    // PRODUTOS
+    // 
+    listarProdutos: () =>
+      ipcRenderer.invoke(
+        'listar-produtos'
+      ),
 
-   buscarProdutos: (termo: string) =>
-    ipcRenderer.invoke(
-      'buscar-produtos',
-      termo
-    ),
+    buscarProdutos: (
+      termo: string
+    ) =>
+      ipcRenderer.invoke(
+        'buscar-produtos',
+        termo
+      ),
 
-  listarEstoqueCritico: () =>
-    ipcRenderer.invoke(
-      'listar-estoque-critico'
-    ),
+    listarEstoqueCritico: () =>
+      ipcRenderer.invoke(
+        'listar-estoque-critico'
+      ),
 
- 
-  listarCategorias: () =>
-    ipcRenderer.invoke(
-      'listar-categorias'
-    ),
+    cadastrarProduto: (
+      nome: string,
+      codigo_barras: string,
+      preco_venda: number,
+      id_categoria: number
+    ) =>
+      ipcRenderer.invoke(
+        'cadastrar-produto',
+        {
+          nome,
+          codigo_barras,
+          preco_venda,
+          id_categoria,
+        }
+      ),
 
-  cadastrarCategoria: (
-    nome: string,
-    descricao: string
-  ) =>
-    ipcRenderer.invoke(
-      'cadastrar-categoria',
-      {
-        nome,
-        descricao
-      }
-    ),
+    editarProduto: (
+      id: number,
+      nome: string,
+      codigo_barras: string,
+      preco_venda: number,
+      id_categoria: number
+    ) =>
+      ipcRenderer.invoke(
+        'editar-produto',
+        {
+          id,
+          nome,
+          codigo_barras,
+          preco_venda,
+          id_categoria,
+        }
+      ),
 
-  cadastrarProduto: (
-  nome: string,
-  codigo_barras: string,
-  preco_venda: number,
-  id_categoria: number
-) =>
-  ipcRenderer.invoke(
-    'cadastrar-produto',
-    {
-      nome,
-      codigo_barras,
-      preco_venda,
-      id_categoria
-    }
-  ),
+    excluirProduto: (
+      id: number
+    ) =>
+      ipcRenderer.invoke(
+        'excluir-produto',
+        id
+      ),
 
-  registrarMovimentacao: (
-  id_produto: number,
-  quantidade: number,
-  tipo: 'entrada' | 'saida'
-) =>
-  ipcRenderer.invoke(
-    'registrar-movimentacao',
-    {
-      id_produto,
-      quantidade,
-      tipo
-    }
-  ),
+    // CATEGORIAS
+    // 
 
-})
+    listarCategorias: () =>
+      ipcRenderer.invoke(
+        'listar-categorias'
+      ),
 
+    cadastrarCategoria: (
+      nome: string,
+      descricao: string
+    ) =>
+      ipcRenderer.invoke(
+        'cadastrar-categoria',
+        {
+          nome,
+          descricao,
+        }
+      ),
+
+    editarCategoria: (
+      id: number,
+      nome: string,
+      descricao: string
+    ) =>
+      ipcRenderer.invoke(
+        'editar-categoria',
+        {
+          id,
+          nome,
+          descricao,
+        }
+      ),
+
+    excluirCategoria: (
+      id: number
+    ) =>
+      ipcRenderer.invoke(
+        'excluir-categoria',
+        id
+      ),
+
+    // MOVIMENTAÇÕES
+    // 
+    registrarMovimentacao: (
+      id_produto: number,
+      quantidade: number,
+      tipo:
+        | 'entrada'
+        | 'saida'
+    ) =>
+      ipcRenderer.invoke(
+        'registrar-movimentacao',
+        {
+          id_produto,
+          quantidade,
+          tipo,
+        }
+      ),
+  }
+)
