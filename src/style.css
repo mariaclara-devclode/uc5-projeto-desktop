@@ -50,6 +50,26 @@ button:hover {
   background: #2563eb;
 }
 
+/* Botão editar */
+
+.btn-editar-produto {
+  background: #f59e0b;
+}
+
+.btn-editar-produto:hover {
+  background: #d97706;
+}
+
+/* Botão excluir */
+
+.btn-excluir-produto {
+  background: #ef4444;
+}
+
+.btn-excluir-produto:hover {
+  background: #dc2626;
+}
+
 /* Inputs */
 
 input,
