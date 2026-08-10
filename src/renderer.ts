@@ -178,10 +178,8 @@ appElement.innerHTML = `
   <p id="resposta-movimentacao"></p>
 `
 
-// =====================================================
 // ELEMENTOS DA INTERFACE
-// =====================================================
-
+// 
 const resposta =
   document.getElementById(
     'resposta'
@@ -217,10 +215,8 @@ const campoBusca =
     'campo-busca'
   ) as HTMLInputElement
 
-// =====================================================
 // CATEGORIA
-// =====================================================
-
+// 
 const formCategoria =
   document.getElementById(
     'form-categoria'
@@ -241,9 +237,8 @@ const respostaCategoria =
     'resposta-categoria'
   ) as HTMLParagraphElement
 
-// =====================================================
 // PRODUTO
-// =====================================================
+// 
 
 const formProduto =
   document.getElementById(
@@ -275,9 +270,8 @@ const respostaProduto =
     'resposta-produto'
   ) as HTMLParagraphElement
 
-// =====================================================
 // MOVIMENTAÇÃO
-// =====================================================
+// 
 
 const formMovimentacao =
   document.getElementById(
@@ -304,10 +298,8 @@ const respostaMovimentacao =
     'resposta-movimentacao'
   ) as HTMLParagraphElement
 
-
-// =====================================================
 // MOSTRAR PRODUTOS NA TABELA
-// =====================================================
+//
 
 function mostrarProdutos(
   produtos: Awaited<
@@ -345,16 +337,30 @@ function mostrarProdutos(
       <td>${produto.estoque}</td>
 
       <td>${status}</td>
+
+      <td>
+  <button
+    class="btn-editar-produto"
+    data-id="${produto.id}"
+  >
+    Editar
+  </button>
+
+  <button
+    class="btn-excluir-produto"
+    data-id="${produto.id}"
+  >
+    Excluir
+  </button>
+</td>
     `
 
     tabelaProdutos.appendChild(linha)
   })
 }
 
-
-// =====================================================
 // LISTAR PRODUTOS
-// =====================================================
+// 
 
 btnProdutos.addEventListener(
   'click',
@@ -384,9 +390,8 @@ btnProdutos.addEventListener(
 )
 
 
-// =====================================================
+// 
 // BUSCAR PRODUTOS
-// =====================================================
 
 btnBuscar.addEventListener(
   'click',
@@ -400,7 +405,7 @@ btnBuscar.addEventListener(
       if (!termo) {
 
         resposta.textContent =
-          'Digite um nome ou código de barras.'
+          'Digite um id, nome ou código de barras.'
 
         return
       }
