@@ -365,3 +365,11 @@ td:last-child {
     font-size: 25px;
   }
 }
+
+/* TELAS */
+
+#tela-cadastro,
+#tela-categorias,
+#tela-movimentacoes {
+  display: none;
+}
