@@ -1,225 +1,443 @@
 import './style.css'
 
-const app = document.getElementById('app') as HTMLDivElement
+
+const app =
+  document.getElementById(
+    'app'
+  ) as HTMLDivElement
+
 
 app.innerHTML = `
-  <h1>Gerenciador de Estoque Comercial</h1>
+<div class="cabecalho">
 
-  <section>
-    <h2>Produtos</h2>
+  <h1>
+    Gerenciador de Estoque Comercial
+  </h1>
 
-    <button id="btn-produtos">Listar Produtos</button>
-    <button id="btn-criticos">Estoque Crítico</button>
+  <p>
+    Sistema de controle de produtos e estoque
+  </p>
 
-    <br>
+</div>
 
-    <input
-      id="campo-busca"
-      type="text"
-      placeholder="Buscar por ID, nome ou código"
-    >
 
-    <button id="btn-buscar">Buscar</button>
-    <button id="btn-limpar">Limpar</button>
+  <!-- MENU DE TELAS -->
 
-    <p id="resposta"></p>
+  <select id="menu-tela">
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Código</th>
-          <th>Preço</th>
-          <th>Categoria</th>
-          <th>Estoque</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
+    <option value="produtos">
+      Produtos
+    </option>
 
-      <tbody id="tabela-produtos"></tbody>
-    </table>
-  </section>
+    <option value="cadastro">
+      Cadastro
+    </option>
 
-  <section>
-    <h2>Cadastrar Produto</h2>
+    <option value="categorias">
+      Categorias
+    </option>
 
-    <form id="form-produto">
-      <input id="produto-nome" placeholder="Nome" required>
+    <option value="movimentacoes">
+      Movimentações
+    </option>
+
+  </select>
+
+
+  <!TELA PRODUTOS >
+
+  <div id="tela-produtos">
+
+    <section>
+
+      <h2>
+        Produtos
+      </h2>
+
+
+      <button id="btn-produtos">
+        Listar Produtos
+      </button>
+
+
+      <button id="btn-criticos">
+        Estoque Crítico
+      </button>
+
+
+      <br>
+
 
       <input
-        id="produto-codigo"
-        placeholder="Código de barras"
-        required
+        id="campo-busca"
+        type="text"
+        placeholder="Buscar por ID, nome ou código"
       >
 
-      <input
-        id="produto-preco"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="Preço"
-        required
-      >
 
-      <select id="produto-categoria" required>
-        <option value="">Selecione a categoria</option>
-      </select>
+      <button id="btn-buscar">
+        Buscar
+      </button>
 
-      <button type="submit">
+
+      <button id="btn-limpar">
+        Limpar
+      </button>
+
+
+      <p id="resposta"></p>
+
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Código</th>
+            <th>Preço</th>
+            <th>Categoria</th>
+            <th>Estoque</th>
+            <th>Status</th>
+            <th>Ações</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="tabela-produtos"></tbody>
+
+      </table>
+
+    </section>
+
+  </div>
+
+
+  <!TELA CADASTRO>
+
+  <div id="tela-cadastro">
+
+    <section>
+
+      <h2>
         Cadastrar Produto
-      </button>
-    </form>
+      </h2>
 
-    <p id="resposta-produto"></p>
-  </section>
 
-  <section>
-    <h2>Categorias</h2>
+      <form id="form-produto">
 
-    <form id="form-categoria">
-      <input
-        id="categoria-nome"
-        placeholder="Nome da categoria"
-        required
-      >
+        <input
+          id="produto-nome"
+          placeholder="Nome"
+          required
+        >
 
-      <input
-        id="categoria-descricao"
-        placeholder="Descrição"
-        required
-      >
 
-      <button type="submit">
+        <input
+          id="produto-codigo"
+          placeholder="Código de barras"
+          required
+        >
+
+
+        <input
+          id="produto-preco"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Preço"
+          required
+        >
+
+
+        <select
+          id="produto-categoria"
+          required
+        >
+
+          <option value="">
+            Selecione a categoria
+          </option>
+
+        </select>
+
+
+        <button type="submit">
+          Cadastrar Produto
+        </button>
+
+      </form>
+
+
+      <p id="resposta-produto"></p>
+
+    </section>
+
+
+    <section>
+
+      <h2>
         Cadastrar Categoria
-      </button>
-    </form>
+      </h2>
 
-    <p id="resposta-categoria"></p>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Descrição</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
+      <form id="form-categoria">
 
-      <tbody id="tabela-categorias"></tbody>
-    </table>
-  </section>
+        <input
+          id="categoria-nome"
+          placeholder="Nome da categoria"
+          required
+        >
 
-  <section>
-    <h2>Registrar Movimentação</h2>
 
-    <form id="form-movimentacao">
+        <input
+          id="categoria-descricao"
+          placeholder="Descrição"
+          required
+        >
 
-      <select id="movimentacao-produto" required>
-        <option value="">
-          Selecione um produto
-        </option>
-      </select>
 
-      <input
-        id="movimentacao-quantidade"
-        type="number"
-        min="1"
-        placeholder="Quantidade"
-        required
-      >
+        <button type="submit">
+          Cadastrar Categoria
+        </button>
 
-      <select id="movimentacao-tipo" required>
-        <option value="">
-          Selecione o tipo
-        </option>
+      </form>
 
-        <option value="entrada">
-          Entrada
-        </option>
 
-        <option value="saida">
-          Saída
-        </option>
-      </select>
+      <p id="resposta-categoria"></p>
 
-      <button type="submit">
+    </section>
+
+  </div>
+
+
+  <!TELA CATEGORIAS>
+
+  <div id="tela-categorias">
+
+    <section>
+
+      <h2>
+        Categorias
+      </h2>
+
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Ações</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="tabela-categorias"></tbody>
+
+      </table>
+
+    </section>
+
+  </div>
+
+
+  <!TELA MOVIMENTAÇÕES >
+
+  <div id="tela-movimentacoes">
+
+    <section>
+
+      <h2>
         Registrar Movimentação
-      </button>
+      </h2>
 
-    </form>
 
-    <p id="resposta-movimentacao"></p>
-  </section>
+      <form id="form-movimentacao">
+
+
+        <select
+          id="movimentacao-produto"
+          required
+        >
+
+          <option value="">
+            Selecione um produto
+          </option>
+
+        </select>
+
+
+        <input
+          id="movimentacao-quantidade"
+          type="number"
+          min="1"
+          placeholder="Quantidade"
+          required
+        >
+
+
+        <select
+          id="movimentacao-tipo"
+          required
+        >
+
+          <option value="">
+            Selecione o tipo
+          </option>
+
+
+          <option value="entrada">
+            Entrada
+          </option>
+
+
+          <option value="saida">
+            Saída
+          </option>
+
+        </select>
+
+
+        <button type="submit">
+          Registrar Movimentação
+        </button>
+
+
+      </form>
+
+
+      <p id="resposta-movimentacao"></p>
+
+    </section>
+
+  </div>
+
 `
+
 
 // PRODUTOS
 
 export const btnProdutos =
-  document.getElementById('btn-produtos') as HTMLButtonElement
+  document.getElementById(
+    'btn-produtos'
+  ) as HTMLButtonElement
+
 
 export const btnCriticos =
-  document.getElementById('btn-criticos') as HTMLButtonElement
+  document.getElementById(
+    'btn-criticos'
+  ) as HTMLButtonElement
+
 
 export const btnBuscar =
-  document.getElementById('btn-buscar') as HTMLButtonElement
+  document.getElementById(
+    'btn-buscar'
+  ) as HTMLButtonElement
+
 
 export const btnLimpar =
-  document.getElementById('btn-limpar') as HTMLButtonElement
+  document.getElementById(
+    'btn-limpar'
+  ) as HTMLButtonElement
+
 
 export const campoBusca =
-  document.getElementById('campo-busca') as HTMLInputElement
+  document.getElementById(
+    'campo-busca'
+  ) as HTMLInputElement
+
 
 export const resposta =
-  document.getElementById('resposta') as HTMLParagraphElement
+  document.getElementById(
+    'resposta'
+  ) as HTMLParagraphElement
+
 
 export const tabelaProdutos =
-  document.getElementById('tabela-produtos') as HTMLTableSectionElement
+  document.getElementById(
+    'tabela-produtos'
+  ) as HTMLTableSectionElement
+
+
+// CADASTRO DE PRODUTO
 
 export const formProduto =
-  document.getElementById('form-produto') as HTMLFormElement
+  document.getElementById(
+    'form-produto'
+  ) as HTMLFormElement
+
 
 export const produtoNome =
-  document.getElementById('produto-nome') as HTMLInputElement
+  document.getElementById(
+    'produto-nome'
+  ) as HTMLInputElement
+
 
 export const produtoCodigo =
-  document.getElementById('produto-codigo') as HTMLInputElement
+  document.getElementById(
+    'produto-codigo'
+  ) as HTMLInputElement
+
 
 export const produtoPreco =
-  document.getElementById('produto-preco') as HTMLInputElement
+  document.getElementById(
+    'produto-preco'
+  ) as HTMLInputElement
+
 
 export const produtoCategoria =
-  document.getElementById('produto-categoria') as HTMLSelectElement
+  document.getElementById(
+    'produto-categoria'
+  ) as HTMLSelectElement
+
 
 export const respostaProduto =
   document.getElementById(
     'resposta-produto'
   ) as HTMLParagraphElement
 
+
 // CATEGORIAS
 
 export const formCategoria =
-  document.getElementById('form-categoria') as HTMLFormElement
+  document.getElementById(
+    'form-categoria'
+  ) as HTMLFormElement
+
 
 export const categoriaNome =
-  document.getElementById('categoria-nome') as HTMLInputElement
+  document.getElementById(
+    'categoria-nome'
+  ) as HTMLInputElement
+
 
 export const categoriaDescricao =
   document.getElementById(
     'categoria-descricao'
   ) as HTMLInputElement
 
+
 export const respostaCategoria =
   document.getElementById(
     'resposta-categoria'
   ) as HTMLParagraphElement
 
+
 export const tabelaCategorias =
   document.getElementById(
     'tabela-categorias'
   ) as HTMLTableSectionElement
+
 
 // MOVIMENTAÇÕES
 
@@ -228,20 +446,24 @@ export const formMovimentacao =
     'form-movimentacao'
   ) as HTMLFormElement
 
+
 export const movimentacaoProduto =
   document.getElementById(
     'movimentacao-produto'
   ) as HTMLSelectElement
+
 
 export const movimentacaoQuantidade =
   document.getElementById(
     'movimentacao-quantidade'
   ) as HTMLInputElement
 
+
 export const movimentacaoTipo =
   document.getElementById(
     'movimentacao-tipo'
   ) as HTMLSelectElement
+
 
 export const respostaMovimentacao =
   document.getElementById(
