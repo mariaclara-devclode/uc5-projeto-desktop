@@ -6,173 +6,253 @@
     <title>Gerenciador de Estoque Comercial</title>
   </head>
   <body>
-    <div id="app">
-      <h1>Gerenciador de Estoque Comercial</h1>
 
-      <!-- MENU DE TELAS -->
+  <div id="app">
 
-      <select id="menu-tela">
-        <option value="produtos">Produtos</option>
+    <h1>Gerenciador de Estoque Comercial</h1>
 
-        <option value="categorias">Categorias</option>
+    <!-- MENU DE TELAS -->
 
-        <option value="cadastro">Cadastro</option>
+    <select id="menu-tela">
 
-        <option value="movimentacoes">Movimentações</option>
-      </select>
+      <option value="produtos">
+        Produtos
+      </option>
 
-      <!TELA PRODUTOS >
+      <option value="categorias">
+        Categorias
+      </option>
 
-      <section id="tela-produtos">
-        <h2>Produtos</h2>
+      <option value="cadastro">
+        Cadastro
+      </option>
 
-        <button id="btn-produtos">Listar Produtos</button>
+      <option value="movimentacoes">
+        Movimentações
+      </option>
 
-        <button id="btn-criticos">Estoque Crítico</button>
+    </select>
 
-        <br />
+
+    <!TELA PRODUTOS >
+
+    <section id="tela-produtos">
+
+      <h2>Produtos</h2>
+
+      <button id="btn-produtos">
+        Listar Produtos
+      </button>
+
+      <button id="btn-criticos">
+        Estoque Crítico
+      </button>
+
+      <br>
+
+      <input
+        id="campo-busca"
+        type="text"
+        placeholder="Buscar por ID, nome ou código"
+      >
+
+      <button id="btn-buscar">
+        Buscar
+      </button>
+
+      <button id="btn-limpar">
+        Limpar
+      </button>
+
+      <p id="resposta"></p>
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Código</th>
+            <th>Preço</th>
+            <th>Categoria</th>
+            <th>Estoque</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="tabela-produtos"></tbody>
+
+      </table>
+
+    </section>
+
+
+    <!TELA CATEGORIAS >
+
+    <section id="tela-categorias">
+
+      <h2>Categorias</h2>
+
+      <form id="form-categoria">
 
         <input
-          id="campo-busca"
+          id="categoria-nome"
           type="text"
-          placeholder="Buscar por ID, nome ou código"
-        />
+          placeholder="Nome da categoria"
+          required
+        >
 
-        <button id="btn-buscar">Buscar</button>
+        <input
+          id="categoria-descricao"
+          type="text"
+          placeholder="Descrição"
+          required
+        >
 
-        <button id="btn-limpar">Limpar</button>
+        <button type="submit">
+          Cadastrar Categoria
+        </button>
 
-        <p id="resposta"></p>
+      </form>
 
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Código</th>
-              <th>Preço</th>
-              <th>Categoria</th>
-              <th>Estoque</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
+      <p id="resposta-categoria"></p>
 
-          <tbody id="tabela-produtos"></tbody>
-        </table>
-      </section>
+      <table>
 
-      <!TELA CATEGORIAS >
+        <thead>
 
-      <section id="tela-categorias">
-        <h2>Categorias</h2>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Ações</th>
+          </tr>
 
-        <form id="form-categoria">
-          <input
-            id="categoria-nome"
-            type="text"
-            placeholder="Nome da categoria"
-            required
-          />
+        </thead>
 
-          <input
-            id="categoria-descricao"
-            type="text"
-            placeholder="Descrição"
-            required
-          />
+        <tbody id="tabela-categorias"></tbody>
 
-          <button type="submit">Cadastrar Categoria</button>
-        </form>
+      </table>
 
-        <p id="resposta-categoria"></p>
+    </section>
 
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
 
-          <tbody id="tabela-categorias"></tbody>
-        </table>
-      </section>
+    <!TELA CADASTRO >
 
-      <!TELA CADASTRO >
+    <section id="tela-cadastro">
 
-      <section id="tela-cadastro">
-        <h2>Cadastrar Produto</h2>
+      <h2>Cadastrar Produto</h2>
 
-        <form id="form-produto">
-          <input
-            id="produto-nome"
-            type="text"
-            placeholder="Nome do produto"
-            required
-          />
+      <form id="form-produto">
 
-          <input
-            id="produto-codigo"
-            type="text"
-            placeholder="Código de barras"
-            required
-          />
+        <input
+          id="produto-nome"
+          type="text"
+          placeholder="Nome do produto"
+          required
+        >
 
-          <input
-            id="produto-preco"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="Preço de venda"
-            required
-          />
+        <input
+          id="produto-codigo"
+          type="text"
+          placeholder="Código de barras"
+          required
+        >
 
-          <select id="produto-categoria" required>
-            <option value="">Selecione uma categoria</option>
-          </select>
+        <input
+          id="produto-preco"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Preço de venda"
+          required
+        >
 
-          <button type="submit">Cadastrar Produto</button>
-        </form>
+        <select
+          id="produto-categoria"
+          required
+        >
 
-        <p id="resposta-produto"></p>
-      </section>
+          <option value="">
+            Selecione uma categoria
+          </option>
 
-      <! TELA MOVIMENTAÇÕES >
+        </select>
 
-      <section id="tela-movimentacoes">
-        <h2>Registrar Movimentação</h2>
+        <button type="submit">
+          Cadastrar Produto
+        </button>
 
-        <form id="form-movimentacao">
-          <select id="movimentacao-produto" required>
-            <option value="">Selecione um produto</option>
-          </select>
+      </form>
 
-          <input
-            id="movimentacao-quantidade"
-            type="number"
-            min="1"
-            placeholder="Quantidade"
-            required
-          />
+      <p id="resposta-produto"></p>
 
-          <select id="movimentacao-tipo" required>
-            <option value="">Selecione o tipo</option>
+    </section>
 
-            <option value="entrada">Entrada</option>
 
-            <option value="saida">Saída</option>
-          </select>
+    <! TELA MOVIMENTAÇÕES >
 
-          <button type="submit">Registrar Movimentação</button>
-        </form>
+    <section id="tela-movimentacoes">
 
-        <p id="resposta-movimentacao"></p>
-      </section>
-    </div>
+      <h2>Registrar Movimentação</h2>
 
-    <script type="module" src="/src/renderer.ts"></script>
-  </body>
+      <form id="form-movimentacao">
+
+        <select
+          id="movimentacao-produto"
+          required
+        >
+
+          <option value="">
+            Selecione um produto
+          </option>
+
+        </select>
+
+        <input
+          id="movimentacao-quantidade"
+          type="number"
+          min="1"
+          placeholder="Quantidade"
+          required
+        >
+
+        <select
+          id="movimentacao-tipo"
+          required
+        >
+
+          <option value="">
+            Selecione o tipo
+          </option>
+
+          <option value="entrada">
+            Entrada
+          </option>
+
+          <option value="saida">
+            Saída
+          </option>
+
+        </select>
+
+        <button type="submit">
+          Registrar Movimentação
+        </button>
+
+      </form>
+
+      <p id="resposta-movimentacao"></p>
+
+    </section>
+
+  </div>
+
+  <script type="module" src="/src/renderer.ts"></script>
+
+</body>
+  
 </html>
