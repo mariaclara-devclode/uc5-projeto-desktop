@@ -20,20 +20,24 @@ export function configurarMenuTelas() {
       'menu-tela'
     ) as HTMLSelectElement
 
+
   const telaProdutos =
     document.getElementById(
       'tela-produtos'
     ) as HTMLDivElement
+
 
   const telaCadastro =
     document.getElementById(
       'tela-cadastro'
     ) as HTMLDivElement
 
+
   const telaCategorias =
     document.getElementById(
       'tela-categorias'
     ) as HTMLDivElement
+
 
   const telaMovimentacoes =
     document.getElementById(
@@ -61,33 +65,42 @@ export function configurarMenuTelas() {
     if (
       tela === TELA_PRODUTOS
     ) {
+
       telaProdutos.style.display =
         'block'
+
     }
 
 
     if (
       tela === TELA_CADASTRO
     ) {
+
       telaCadastro.style.display =
         'block'
+
     }
 
 
     if (
       tela === TELA_CATEGORIAS
     ) {
+
       telaCategorias.style.display =
         'block'
+
     }
 
 
     if (
       tela === TELA_MOVIMENTACOES
     ) {
+
       telaMovimentacoes.style.display =
         'block'
+
     }
+
   }
 
 
@@ -106,4 +119,5 @@ export function configurarMenuTelas() {
   mostrarTela(
     TELA_PRODUTOS
   )
+
 }
