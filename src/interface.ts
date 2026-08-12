@@ -8,6 +8,7 @@ const app =
 
 
 app.innerHTML = `
+
 <div class="cabecalho">
 
   <h1>
@@ -21,308 +22,326 @@ app.innerHTML = `
 </div>
 
 
-  <!-- MENU DE TELAS -->
+<select id="menu-tela">
 
-  <select id="menu-tela">
+  <option value="produtos">
+    Produtos
+  </option>
 
-    <option value="produtos">
+  <option value="cadastro">
+    Cadastro
+  </option>
+
+  <option value="categorias">
+    Categorias
+  </option>
+
+  <option value="movimentacoes">
+    Movimentações
+  </option>
+
+</select>
+
+
+<!-- TELA PRODUTOS -->
+
+<div id="tela-produtos">
+
+  <section>
+
+    <h2>
       Produtos
-    </option>
-
-    <option value="cadastro">
-      Cadastro
-    </option>
-
-    <option value="categorias">
-      Categorias
-    </option>
-
-    <option value="movimentacoes">
-      Movimentações
-    </option>
-
-  </select>
+    </h2>
 
 
-  <!TELA PRODUTOS >
-
-  <div id="tela-produtos">
-
-    <section>
-
-      <h2>
-        Produtos
-      </h2>
+    <button id="btn-produtos">
+      Listar Produtos
+    </button>
 
 
-      <button id="btn-produtos">
-        Listar Produtos
-      </button>
+    <button id="btn-criticos">
+      Estoque Crítico
+    </button>
 
 
-      <button id="btn-criticos">
-        Estoque Crítico
-      </button>
+    <br>
 
 
-      <br>
+    <input
+      id="campo-busca"
+      type="text"
+      placeholder="Buscar por ID, nome ou código"
+    >
 
+
+    <button id="btn-buscar">
+      Buscar
+    </button>
+
+
+    <button id="btn-limpar">
+      Limpar
+    </button>
+
+
+    <p id="resposta"></p>
+
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Código</th>
+          <th>Preço</th>
+          <th>Categoria</th>
+          <th>Estoque</th>
+          <th>Status</th>
+          <th>Ações</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="tabela-produtos"
+      ></tbody>
+
+    </table>
+
+  </section>
+
+</div>
+
+
+<!-- TELA CADASTRO -->
+
+<div id="tela-cadastro">
+
+  <section>
+
+    <h2 id="titulo-form-produto">
+      Cadastrar Produto
+    </h2>
+
+
+    <form id="form-produto">
 
       <input
-        id="campo-busca"
-        type="text"
-        placeholder="Buscar por ID, nome ou código"
+        id="produto-nome"
+        placeholder="Nome"
+        required
       >
 
 
-      <button id="btn-buscar">
-        Buscar
-      </button>
+      <input
+        id="produto-codigo"
+        placeholder="Código de barras"
+        required
+      >
 
 
-      <button id="btn-limpar">
-        Limpar
-      </button>
+      <input
+        id="produto-preco"
+        type="number"
+        step="0.01"
+        min="0"
+        placeholder="Preço de venda"
+        required
+      >
 
 
-      <p id="resposta"></p>
+      <select
+        id="produto-categoria"
+        required
+      >
+
+        <option value="">
+          Selecione uma categoria
+        </option>
+
+      </select>
 
 
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Código</th>
-            <th>Preço</th>
-            <th>Categoria</th>
-            <th>Estoque</th>
-            <th>Status</th>
-            <th>Ações</th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody id="tabela-produtos"></tbody>
-
-      </table>
-
-    </section>
-
-  </div>
-
-
-  <!TELA CADASTRO>
-
-  <div id="tela-cadastro">
-
-    <section>
-
-      <h2>
+      <button
+        id="btn-salvar-produto"
+        type="submit"
+      >
         Cadastrar Produto
-      </h2>
+      </button>
 
 
-      <form id="form-produto">
+      <button
+        id="btn-cancelar-edicao"
+        type="button"
+        style="display: none;"
+      >
+        Cancelar edição
+      </button>
 
-        <input
-          id="produto-nome"
-          placeholder="Nome"
-          required
-        >
-
-
-        <input
-          id="produto-codigo"
-          placeholder="Código de barras"
-          required
-        >
+    </form>
 
 
-        <input
-          id="produto-preco"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="Preço"
-          required
-        >
+    <p id="resposta-produto"></p>
+
+  </section>
 
 
-        <select
-          id="produto-categoria"
-          required
-        >
+  <section>
 
-          <option value="">
-            Selecione a categoria
-          </option>
-
-        </select>
+    <h2>
+      Cadastrar Categoria
+    </h2>
 
 
-        <button type="submit">
-          Cadastrar Produto
-        </button>
+    <form id="form-categoria">
 
-      </form>
-
-
-      <p id="resposta-produto"></p>
-
-    </section>
+      <input
+        id="categoria-nome"
+        placeholder="Nome da categoria"
+        required
+      >
 
 
-    <section>
+      <input
+        id="categoria-descricao"
+        placeholder="Descrição"
+        required
+      >
 
-      <h2>
+
+      <button type="submit">
         Cadastrar Categoria
-      </h2>
+      </button>
+
+    </form>
 
 
-      <form id="form-categoria">
+    <p id="resposta-categoria"></p>
 
-        <input
-          id="categoria-nome"
-          placeholder="Nome da categoria"
-          required
-        >
+  </section>
+
+</div>
 
 
-        <input
-          id="categoria-descricao"
-          placeholder="Descrição"
-          required
-        >
+<!-- TELA CATEGORIAS -->
+
+<div id="tela-categorias">
+
+  <section>
+
+    <h2>
+      Categorias
+    </h2>
 
 
-        <button type="submit">
-          Cadastrar Categoria
-        </button>
+    <table>
 
-      </form>
+      <thead>
 
+        <tr>
 
-      <p id="resposta-categoria"></p>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Ações</th>
 
-    </section>
+        </tr>
 
-  </div>
-
-
-  <!TELA CATEGORIAS>
-
-  <div id="tela-categorias">
-
-    <section>
-
-      <h2>
-        Categorias
-      </h2>
+      </thead>
 
 
-      <table>
+      <tbody
+        id="tabela-categorias"
+      ></tbody>
 
-        <thead>
+    </table>
 
-          <tr>
+  </section>
 
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Ações</th>
-
-          </tr>
-
-        </thead>
+</div>
 
 
-        <tbody id="tabela-categorias"></tbody>
+<!-- TELA MOVIMENTAÇÕES -->
 
-      </table>
+<div id="tela-movimentacoes">
 
-    </section>
+  <section>
 
-  </div>
+    <h2>
+      Registrar Movimentação
+    </h2>
 
 
-  <!TELA MOVIMENTAÇÕES >
+    <form id="form-movimentacao">
 
-  <div id="tela-movimentacoes">
+      <select
+        id="movimentacao-produto"
+        required
+      >
 
-    <section>
+        <option value="">
+          Selecione um produto
+        </option>
 
-      <h2>
+      </select>
+
+
+      <input
+        id="movimentacao-quantidade"
+        type="number"
+        min="1"
+        placeholder="Quantidade"
+        required
+      >
+
+
+      <select
+        id="movimentacao-tipo"
+        required
+      >
+
+        <option value="">
+          Selecione o tipo
+        </option>
+
+        <option value="entrada">
+          Entrada
+        </option>
+
+        <option value="saida">
+          Saída
+        </option>
+
+      </select>
+
+
+      <button type="submit">
         Registrar Movimentação
-      </h2>
+      </button>
+
+    </form>
 
 
-      <form id="form-movimentacao">
+    <p id="resposta-movimentacao"></p>
 
+  </section>
 
-        <select
-          id="movimentacao-produto"
-          required
-        >
-
-          <option value="">
-            Selecione um produto
-          </option>
-
-        </select>
-
-
-        <input
-          id="movimentacao-quantidade"
-          type="number"
-          min="1"
-          placeholder="Quantidade"
-          required
-        >
-
-
-        <select
-          id="movimentacao-tipo"
-          required
-        >
-
-          <option value="">
-            Selecione o tipo
-          </option>
-
-
-          <option value="entrada">
-            Entrada
-          </option>
-
-
-          <option value="saida">
-            Saída
-          </option>
-
-        </select>
-
-
-        <button type="submit">
-          Registrar Movimentação
-        </button>
-
-
-      </form>
-
-
-      <p id="resposta-movimentacao"></p>
-
-    </section>
-
-  </div>
+</div>
 
 `
+
+
+// MENU
+
+export const menuTela =
+  document.getElementById(
+    'menu-tela'
+  ) as HTMLSelectElement
 
 
 // PRODUTOS
@@ -405,6 +424,24 @@ export const respostaProduto =
   document.getElementById(
     'resposta-produto'
   ) as HTMLParagraphElement
+
+
+export const tituloFormProduto =
+  document.getElementById(
+    'titulo-form-produto'
+  ) as HTMLHeadingElement
+
+
+export const btnSalvarProduto =
+  document.getElementById(
+    'btn-salvar-produto'
+  ) as HTMLButtonElement
+
+
+export const btnCancelarEdicao =
+  document.getElementById(
+    'btn-cancelar-edicao'
+  ) as HTMLButtonElement
 
 
 // CATEGORIAS
