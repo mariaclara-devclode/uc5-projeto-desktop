@@ -12,28 +12,30 @@ import {
   produtoPreco,
   produtoCategoria,
   respostaProduto,
-  movimentacaoProduto
+  movimentacaoProduto,
+  tituloFormProduto,
+  btnSalvarProduto,
+  btnCancelarEdicao,
+  menuTela
 } from './interface'
 
 
-// CARREGAR PRODUTOS
+let produtoEmEdicao:
+  number | null = null
+
+
+// LISTAR PRODUTOS
 
 export async function carregarProdutos() {
-  try {
-    const produtos =
-      await window.api.listarProdutos()
 
-    mostrarProdutos(produtos)
+  const produtos =
+    await window.api.listarProdutos()
 
-    return produtos
-  } catch (error) {
-    console.error(
-      'Erro ao carregar produtos:',
-      error
-    )
+  mostrarProdutos(
+    produtos
+  )
 
-    throw error
-  }
+  return produtos
 }
 
 
@@ -46,177 +48,229 @@ export function mostrarProdutos(
     >
   >
 ) {
+
   tabelaProdutos.innerHTML = ''
 
-  produtos.forEach((produto) => {
-    const linha =
-      document.createElement('tr')
 
-    const status =
-      produto.estoque <= 10
-        ? 'CRÍTICO'
-        : 'Normal'
+  produtos.forEach(
+    (produto) => {
 
-    linha.innerHTML = `
-      <td>${produto.id}</td>
+      const linha =
+        document.createElement(
+          'tr'
+        )
 
-      <td>${produto.nome}</td>
 
-      <td>${produto.codigo_barras}</td>
+      const status =
+        produto.estoque <= 10
+          ? 'CRÍTICO'
+          : 'Normal'
 
-      <td>
-        R$ ${Number(
-          produto.preco_venda
-        ).toFixed(2)}
-      </td>
 
-      <td>${produto.categoria}</td>
+      linha.innerHTML = `
 
-      <td>${produto.estoque}</td>
+        <td>
+          ${produto.id}
+        </td>
 
-      <td>${status}</td>
+        <td>
+          ${produto.nome}
+        </td>
 
-      <td>
-        <button
-          class="btn-editar-produto"
-          type="button"
+        <td>
+          ${produto.codigo_barras}
+        </td>
+
+        <td>
+          R$ ${produto.preco_venda.toFixed(2)}
+        </td>
+
+        <td>
+          ${produto.categoria}
+        </td>
+
+        <td>
+          ${produto.estoque}
+        </td>
+
+        <td
+          class="${
+            produto.estoque <= 10
+              ? 'critico'
+              : 'normal'
+          }"
         >
-          Editar
-        </button>
+          ${status}
+        </td>
 
-        <button
-          class="btn-excluir-produto"
-          type="button"
-        >
-          Excluir
-        </button>
-      </td>
-    `
+        <td>
 
-    const btnEditar =
-      linha.querySelector(
-        '.btn-editar-produto'
-      ) as HTMLButtonElement
+          <button
+            class="btn-editar-produto"
+          >
+            Editar
+          </button>
 
-    const btnExcluir =
-      linha.querySelector(
-        '.btn-excluir-produto'
-      ) as HTMLButtonElement
+          <button
+            class="btn-excluir-produto"
+          >
+            Excluir
+          </button>
 
-    btnEditar.addEventListener(
-      'click',
-      async () => {
-        console.log(
-          'Clicou em editar produto:',
-          produto.id
-        )
+        </td>
 
-        await editarProduto(
-          produto.id
-        )
-      }
-    )
+      `
 
-    btnExcluir.addEventListener(
-      'click',
-      async () => {
-        await excluirProduto(
-          produto.id
-        )
-      }
-    )
 
-    tabelaProdutos.appendChild(
-      linha
-    )
-  })
+      const btnEditar =
+        linha.querySelector(
+          '.btn-editar-produto'
+        ) as HTMLButtonElement
+
+
+      const btnExcluir =
+        linha.querySelector(
+          '.btn-excluir-produto'
+        ) as HTMLButtonElement
+
+
+      btnEditar.addEventListener(
+        'click',
+        () => {
+
+          iniciarEdicaoProduto(
+            produto.id
+          )
+
+        }
+      )
+
+
+      btnExcluir.addEventListener(
+        'click',
+        () => {
+
+          excluirProduto(
+            produto.id
+          )
+
+        }
+      )
+
+
+      tabelaProdutos.appendChild(
+        linha
+      )
+
+    }
+  )
 }
 
 
-// BOTÃO PRODUTOS
+// LISTAR
 
 btnProdutos.addEventListener(
   'click',
   async () => {
+
     try {
-      resposta.textContent =
-        'Carregando produtos...'
 
       const produtos =
         await carregarProdutos()
 
+
       resposta.textContent =
         `${produtos.length} produtos encontrados`
+
     } catch (error) {
+
       console.error(error)
 
       resposta.textContent =
         'Erro ao listar produtos.'
+
     }
+
   }
 )
 
 
-// BUSCAR PRODUTOS
+// BUSCAR
 
 btnBuscar.addEventListener(
   'click',
   async () => {
+
     try {
+
       const termo =
         campoBusca.value.trim()
 
+
       if (!termo) {
+
         resposta.textContent =
           'Digite um ID, nome ou código de barras.'
 
         return
+
       }
 
-      resposta.textContent =
-        'Buscando...'
 
       const produtos =
         await window.api.buscarProdutos(
           termo
         )
 
-      mostrarProdutos(produtos)
+
+      mostrarProdutos(
+        produtos
+      )
+
 
       resposta.textContent =
         `${produtos.length} produtos encontrados`
+
     } catch (error) {
-      console.error(
-        'Erro ao buscar:',
-        error
-      )
+
+      console.error(error)
 
       resposta.textContent =
         'Erro ao buscar produtos.'
+
     }
+
   }
 )
 
 
-// LIMPAR BUSCA
+// LIMPAR
 
 btnLimpar.addEventListener(
   'click',
   async () => {
+
     campoBusca.value = ''
 
+
     try {
+
       const produtos =
         await carregarProdutos()
 
+
       resposta.textContent =
         `${produtos.length} produtos encontrados`
+
     } catch (error) {
+
       console.error(error)
 
       resposta.textContent =
         'Erro ao carregar produtos.'
+
     }
+
   }
 )
 
@@ -226,115 +280,190 @@ btnLimpar.addEventListener(
 btnCriticos.addEventListener(
   'click',
   async () => {
+
     try {
-      resposta.textContent =
-        'Buscando estoque crítico...'
 
       const produtos =
         await window.api.listarEstoqueCritico()
 
-      mostrarProdutos(produtos)
+
+      mostrarProdutos(
+        produtos
+      )
+
 
       resposta.textContent =
         `${produtos.length} produtos com estoque crítico`
+
     } catch (error) {
+
       console.error(error)
 
       resposta.textContent =
         'Erro ao buscar estoque crítico.'
+
     }
+
   }
 )
 
 
-// CATEGORIAS
+// CARREGAR CATEGORIAS
 
 export async function carregarCategoriasNoProduto() {
+
   const categorias =
     await window.api.listarCategorias()
 
+
   produtoCategoria.innerHTML = `
+
     <option value="">
       Selecione uma categoria
     </option>
+
   `
 
-  categorias.forEach((categoria) => {
-    const option =
-      document.createElement('option')
 
-    option.value =
-      String(categoria.id)
+  categorias.forEach(
+    (categoria) => {
 
-    option.textContent =
-      categoria.nome
+      const option =
+        document.createElement(
+          'option'
+        )
 
-    produtoCategoria.appendChild(
-      option
-    )
-  })
+
+      option.value =
+        String(
+          categoria.id
+        )
+
+
+      option.textContent =
+        categoria.nome
+
+
+      produtoCategoria.appendChild(
+        option
+      )
+
+    }
+  )
 }
 
 
-// CADASTRAR PRODUTO
+// CADASTRAR OU EDITAR PRODUTO
 
 formProduto.addEventListener(
   'submit',
   async (event) => {
+
     event.preventDefault()
 
+
     try {
+
       const nome =
         produtoNome.value.trim()
 
+
       const codigo =
         produtoCodigo.value.trim()
+
 
       const preco =
         Number(
           produtoPreco.value
         )
 
+
       const idCategoria =
         Number(
           produtoCategoria.value
         )
 
+
       if (!nome) {
+
         respostaProduto.textContent =
           'Informe o nome do produto.'
 
         return
+
       }
 
+
       if (!codigo) {
+
         respostaProduto.textContent =
           'Informe o código de barras.'
 
         return
+
       }
 
+
       if (
-        !Number.isFinite(preco) ||
+        !preco ||
         preco <= 0
       ) {
+
         respostaProduto.textContent =
-          'O preço deve ser maior que zero.'
+          'Informe um preço válido.'
 
         return
+
       }
 
+
       if (
-        !Number.isInteger(
-          idCategoria
-        ) ||
+        !idCategoria ||
         idCategoria <= 0
       ) {
+
         respostaProduto.textContent =
           'Selecione uma categoria.'
 
         return
+
       }
+
+
+      // EDIÇÃO
+
+      if (
+        produtoEmEdicao !== null
+      ) {
+
+        await window.api.editarProduto(
+          produtoEmEdicao,
+          nome,
+          codigo,
+          preco,
+          idCategoria
+        )
+
+
+        respostaProduto.textContent =
+          'Produto atualizado com sucesso!'
+
+
+        cancelarEdicao()
+
+
+        await carregarProdutos()
+
+
+        await carregarProdutosMovimentacao()
+
+
+        return
+
+      }
+
+
+      // CADASTRO
 
       const produto =
         await window.api.cadastrarProduto(
@@ -344,47 +473,58 @@ formProduto.addEventListener(
           idCategoria
         )
 
+
       respostaProduto.textContent =
         `Produto "${produto.nome}" cadastrado com sucesso!`
 
+
       formProduto.reset()
+
 
       await carregarProdutos()
 
+
       await carregarProdutosMovimentacao()
+
     } catch (error) {
+
       console.error(
-        'Erro ao cadastrar produto:',
+        'Erro ao salvar produto:',
         error
       )
+
 
       if (
         error instanceof Error
       ) {
+
         respostaProduto.textContent =
-          `Erro ao cadastrar produto: ${error.message}`
+          error.message
+
       } else {
+
         respostaProduto.textContent =
-          'Erro ao cadastrar produto.'
+          'Erro ao salvar produto.'
+
       }
+
     }
+
   }
 )
 
 
-// EDITAR PRODUTO
+// INICIAR EDIÇÃO
 
-async function editarProduto(
+async function iniciarEdicaoProduto(
   id: number
 ) {
+
   try {
-    console.log(
-      'Iniciando edição do produto:',
-      id
-    )
 
     const produtos =
       await window.api.listarProdutos()
+
 
     const produto =
       produtos.find(
@@ -392,552 +532,137 @@ async function editarProduto(
           item.id === id
       )
 
+
     if (!produto) {
-      alert(
+
+      resposta.textContent =
         'Produto não encontrado.'
-      )
 
       return
+
     }
 
-    const categorias =
-      await window.api.listarCategorias()
 
-    if (
-      categorias.length === 0
-    ) {
-      alert(
-        'Não existem categorias cadastradas.'
-      )
-
-      return
-    }
-
-    // MODAL
-
-    const fundo =
-      document.createElement(
-        'div'
-      )
-
-    fundo.id =
-      'modal-editar-produto'
-
-    fundo.style.position =
-      'fixed'
-
-    fundo.style.top =
-      '0'
-
-    fundo.style.left =
-      '0'
-
-    fundo.style.width =
-      '100%'
-
-    fundo.style.height =
-      '100%'
-
-    fundo.style.background =
-      'rgba(0, 0, 0, 0.6)'
-
-    fundo.style.display =
-      'flex'
-
-    fundo.style.alignItems =
-      'center'
-
-    fundo.style.justifyContent =
-      'center'
-
-    fundo.style.zIndex =
-      '9999'
+    produtoEmEdicao =
+      produto.id
 
 
-    const caixa =
-      document.createElement(
-        'div'
-      )
-
-    caixa.style.background =
-      '#1e293b'
-
-    caixa.style.color =
-      '#f8fafc'
-
-    caixa.style.padding =
-      '30px'
-
-    caixa.style.borderRadius =
-      '12px'
-
-    caixa.style.width =
-      '450px'
-
-    caixa.style.maxWidth =
-      '90%'
-
-
-    const titulo =
-      document.createElement(
-        'h2'
-      )
-
-    titulo.textContent =
-      'Editar Produto'
-
-    titulo.style.marginTop =
-      '0'
-
-    caixa.appendChild(
-      titulo
-    )
-
-
-    // NOME
-
-    const labelNome =
-      document.createElement(
-        'label'
-      )
-
-    labelNome.textContent =
-      'Nome do produto'
-
-    labelNome.style.display =
-      'block'
-
-    labelNome.style.marginTop =
-      '15px'
-
-    caixa.appendChild(
-      labelNome
-    )
-
-
-    const inputNome =
-      document.createElement(
-        'input'
-      )
-
-    inputNome.type =
-      'text'
-
-    inputNome.value =
+    produtoNome.value =
       produto.nome
 
-    inputNome.style.width =
-      '100%'
 
-    inputNome.style.boxSizing =
-      'border-box'
-
-    caixa.appendChild(
-      inputNome
-    )
-
-
-    // CÓDIGO
-
-    const labelCodigo =
-      document.createElement(
-        'label'
-      )
-
-    labelCodigo.textContent =
-      'Código de barras'
-
-    labelCodigo.style.display =
-      'block'
-
-    labelCodigo.style.marginTop =
-      '15px'
-
-    caixa.appendChild(
-      labelCodigo
-    )
-
-
-    const inputCodigo =
-      document.createElement(
-        'input'
-      )
-
-    inputCodigo.type =
-      'text'
-
-    inputCodigo.value =
+    produtoCodigo.value =
       produto.codigo_barras
 
-    inputCodigo.style.width =
-      '100%'
 
-    inputCodigo.style.boxSizing =
-      'border-box'
-
-    caixa.appendChild(
-      inputCodigo
-    )
-
-
-    // PREÇO
-
-    const labelPreco =
-      document.createElement(
-        'label'
-      )
-
-    labelPreco.textContent =
-      'Preço de venda'
-
-    labelPreco.style.display =
-      'block'
-
-    labelPreco.style.marginTop =
-      '15px'
-
-    caixa.appendChild(
-      labelPreco
-    )
-
-
-    const inputPreco =
-      document.createElement(
-        'input'
-      )
-
-    inputPreco.type =
-      'number'
-
-    inputPreco.step =
-      '0.01'
-
-    inputPreco.value =
+    produtoPreco.value =
       String(
         produto.preco_venda
       )
 
-    inputPreco.style.width =
-      '100%'
 
-    inputPreco.style.boxSizing =
-      'border-box'
-
-    caixa.appendChild(
-      inputPreco
-    )
+    await carregarCategoriasNoProduto()
 
 
-    // CATEGORIA
-
-    const labelCategoria =
-      document.createElement(
-        'label'
-      )
-
-    labelCategoria.textContent =
-      'Categoria'
-
-    labelCategoria.style.display =
-      'block'
-
-    labelCategoria.style.marginTop =
-      '15px'
-
-    caixa.appendChild(
-      labelCategoria
-    )
+    const categorias =
+      await window.api.listarCategorias()
 
 
-    const selectCategoria =
-      document.createElement(
-        'select'
-      )
-
-    selectCategoria.style.width =
-      '100%'
-
-    selectCategoria.style.boxSizing =
-      'border-box'
-
-
-    categorias.forEach(
-      (categoria) => {
-        const option =
-          document.createElement(
-            'option'
-          )
-
-        option.value =
-          String(
-            categoria.id
-          )
-
-        option.textContent =
-          categoria.nome
-
-        if (
-          categoria.nome ===
+    const categoria =
+      categorias.find(
+        (item) =>
+          item.nome ===
           produto.categoria
-        ) {
-          option.selected =
-            true
-        }
+      )
 
-        selectCategoria.appendChild(
-          option
+
+    if (categoria) {
+
+      produtoCategoria.value =
+        String(
+          categoria.id
         )
-      }
-    )
 
+    }
 
-    caixa.appendChild(
-      selectCategoria
-    )
 
+    tituloFormProduto.textContent =
+      'Editar Produto'
 
-    // BOTÕES
 
-    const areaBotoes =
-      document.createElement(
-        'div'
-      )
+    btnSalvarProduto.textContent =
+      'Salvar Alterações'
 
-    areaBotoes.style.display =
-      'flex'
 
-    areaBotoes.style.justifyContent =
-      'flex-end'
+    btnCancelarEdicao.style.display =
+      'inline-block'
 
-    areaBotoes.style.gap =
-      '10px'
 
-    areaBotoes.style.marginTop =
-      '25px'
+    respostaProduto.textContent =
+      `Editando produto: ${produto.nome}`
 
-    caixa.appendChild(
-      areaBotoes
-    )
 
+    menuTela.value =
+      'cadastro'
 
-    // CANCELAR
 
-    const btnCancelar =
-      document.createElement(
-        'button'
-      )
-
-    btnCancelar.type =
-      'button'
-
-    btnCancelar.textContent =
-      'Cancelar'
-
-    areaBotoes.appendChild(
-      btnCancelar
-    )
-
-
-    // SALVAR
-
-    const btnSalvar =
-      document.createElement(
-        'button'
-      )
-
-    btnSalvar.type =
-      'button'
-
-    btnSalvar.textContent =
-      'Salvar'
-
-    areaBotoes.appendChild(
-      btnSalvar
-    )
-
-
-    fundo.appendChild(
-      caixa
-    )
-
-    document.body.appendChild(
-      fundo
-    )
-
-
-    // CANCELAR
-
-    btnCancelar.addEventListener(
-      'click',
-      () => {
-        fundo.remove()
-      }
-    )
-
-
-    // SALVAR
-
-    btnSalvar.addEventListener(
-      'click',
-      async () => {
-        try {
-          const nome =
-            inputNome.value.trim()
-
-          const codigo =
-            inputCodigo.value.trim()
-
-          const preco =
-            Number(
-              inputPreco.value
-            )
-
-          const idCategoria =
-            Number(
-              selectCategoria.value
-            )
-
-
-          // VALIDAÇÃO
-
-          if (!nome) {
-            alert(
-              'Informe o nome do produto.'
-            )
-
-            return
-          }
-
-
-          if (!codigo) {
-            alert(
-              'Informe o código de barras.'
-            )
-
-            return
-          }
-
-
-          if (
-            !Number.isFinite(preco) ||
-            preco <= 0
-          ) {
-            alert(
-              'Informe um preço válido.'
-            )
-
-            return
-          }
-
-
-          if (
-            !Number.isInteger(
-              idCategoria
-            ) ||
-            idCategoria <= 0
-          ) {
-            alert(
-              'Selecione uma categoria.'
-            )
-
-            return
-          }
-
-
-          btnSalvar.disabled =
-            true
-
-          btnSalvar.textContent =
-            'Salvando...'
-
-
-          console.log(
-            'Enviando edição:',
-            {
-              id,
-              nome,
-              codigo,
-              preco,
-              idCategoria
-            }
-          )
-
-
-          const produtoAtualizado =
-            await window.api.editarProduto(
-              id,
-              nome,
-              codigo,
-              preco,
-              idCategoria
-            )
-
-
-          console.log(
-            'Produto atualizado:',
-            produtoAtualizado
-          )
-
-
-          fundo.remove()
-
-
-          alert(
-            'Produto editado com sucesso!'
-          )
-
-
-          await carregarProdutos()
-
-          await carregarProdutosMovimentacao()
-
-        } catch (error) {
-          console.error(
-            'Erro ao editar produto:',
-            error
-          )
-
-          btnSalvar.disabled =
-            false
-
-          btnSalvar.textContent =
-            'Salvar'
-
-
-          if (
-            error instanceof Error
-          ) {
-            alert(
-              `Erro ao editar produto:\n\n${error.message}`
-            )
-          } else {
-            alert(
-              'Erro ao editar produto.'
-            )
-          }
-        }
-      }
+    menuTela.dispatchEvent(
+      new Event('change')
     )
 
   } catch (error) {
+
     console.error(
-      'Erro ao abrir edição:',
+      'Erro ao iniciar edição:',
       error
     )
 
-    if (
-      error instanceof Error
-    ) {
-      alert(
-        `Erro ao editar produto:\n\n${error.message}`
-      )
-    } else {
-      alert(
-        'Erro ao editar produto.'
-      )
-    }
+
+    resposta.textContent =
+      'Erro ao carregar produto para edição.'
+
   }
 }
+
+
+// CANCELAR EDIÇÃO
+
+function cancelarEdicao() {
+
+  produtoEmEdicao =
+    null
+
+
+  formProduto.reset()
+
+
+  tituloFormProduto.textContent =
+    'Cadastrar Produto'
+
+
+  btnSalvarProduto.textContent =
+    'Cadastrar Produto'
+
+
+  btnCancelarEdicao.style.display =
+    'none'
+
+}
+
+
+// BOTÃO CANCELAR
+
+btnCancelarEdicao.addEventListener(
+  'click',
+  () => {
+
+    cancelarEdicao()
+
+    respostaProduto.textContent =
+      ''
+
+  }
+)
 
 
 // EXCLUIR PRODUTO
@@ -945,78 +670,103 @@ async function editarProduto(
 async function excluirProduto(
   id: number
 ) {
+
   const confirmar =
     confirm(
       `Deseja realmente excluir o produto ID ${id}?`
     )
 
+
   if (!confirmar) {
     return
   }
 
+
   try {
+
     await window.api.excluirProduto(
       id
     )
+
 
     alert(
       'Produto excluído com sucesso!'
     )
 
+
     await carregarProdutos()
 
+
     await carregarProdutosMovimentacao()
+
   } catch (error) {
+
     console.error(
       'Erro ao excluir produto:',
       error
     )
 
+
     if (
       error instanceof Error
     ) {
+
       alert(
-        `Não foi possível excluir o produto:\n\n${error.message}`
+        error.message
       )
+
     } else {
+
       alert(
         'Não foi possível excluir o produto.'
       )
+
     }
+
   }
 }
 
 
-// MOVIMENTAÇÃO
+// PRODUTOS DA MOVIMENTAÇÃO
 
 export async function carregarProdutosMovimentacao() {
+
   const produtos =
     await window.api.listarProdutos()
 
+
   movimentacaoProduto.innerHTML = `
+
     <option value="">
       Selecione um produto
     </option>
+
   `
+
 
   produtos.forEach(
     (produto) => {
+
       const option =
         document.createElement(
           'option'
         )
+
 
       option.value =
         String(
           produto.id
         )
 
+
       option.textContent =
         `${produto.nome} - Estoque: ${produto.estoque}`
+
 
       movimentacaoProduto.appendChild(
         option
       )
+
     }
   )
 }
