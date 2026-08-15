@@ -1,5 +1,5 @@
-import './interface'
-
+import './style.css'
+import  './interface'
 
 import {
   configurarMenuTelas
@@ -20,8 +20,6 @@ import {
 
 import './movimentacoes'
 
-
-// INICIALIZAÇÃO
 
 async function iniciarSistema() {
 
@@ -54,6 +52,7 @@ async function iniciarSistema() {
     )
 
   }
+
 }
 
 
