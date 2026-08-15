@@ -10,88 +10,226 @@ import {
   carregarCategoriasNoProduto
 } from './produtos'
 
+
 export async function carregarCategorias() {
-  const categorias =
-    await window.api.listarCategorias()
 
-  tabelaCategorias.innerHTML = ''
+  try {
 
-  categorias.forEach((categoria) => {
-    const linha =
-      document.createElement('tr')
+    const categorias =
+      await window.api.listarCategorias()
 
-    linha.innerHTML = `
-      <td>${categoria.id}</td>
-      <td>${categoria.nome}</td>
-      <td>${categoria.descricao}</td>
+    tabelaCategorias.innerHTML = ''
 
-      <td>
-        <button class="btn-editar-categoria">
-          Editar
-        </button>
+    categorias.forEach((categoria) => {
 
-        <button class="btn-excluir-categoria">
-          Excluir
-        </button>
-      </td>
-    `
+      const linha =
+        document.createElement('tr')
 
-    const btnEditar =
-      linha.querySelector(
-        '.btn-editar-categoria'
-      ) as HTMLButtonElement
 
-    const btnExcluir =
-      linha.querySelector(
-        '.btn-excluir-categoria'
-      ) as HTMLButtonElement
+      const colunaId =
+        document.createElement('td')
 
-    btnEditar.addEventListener(
-      'click',
-      () =>
-        editarCategoria(
-          categoria.id,
-          categoria.nome,
-          categoria.descricao
-        )
-    )
+      colunaId.textContent =
+        String(categoria.id)
 
-    btnExcluir.addEventListener(
-      'click',
-      () =>
-        excluirCategoria(
-          categoria.id
-        )
-    )
 
-    tabelaCategorias.appendChild(
-      linha
-    )
-  })
+      const colunaNome =
+        document.createElement('td')
 
-  await carregarCategoriasNoProduto()
+      colunaNome.textContent =
+        categoria.nome
 
-  return categorias
+
+      const colunaDescricao =
+        document.createElement('td')
+
+      colunaDescricao.textContent =
+        categoria.descricao
+
+
+      const colunaAcoes =
+        document.createElement('td')
+
+
+      const btnEditar =
+        document.createElement('button')
+
+      btnEditar.type =
+        'button'
+
+      btnEditar.textContent =
+        'Editar'
+
+      btnEditar.classList.add(
+        'btn-editar-categoria'
+      )
+
+
+      const btnExcluir =
+        document.createElement('button')
+
+      btnExcluir.type =
+        'button'
+
+      btnExcluir.textContent =
+        'Excluir'
+
+      btnExcluir.classList.add(
+        'btn-excluir-categoria'
+      )
+
+
+      btnEditar.addEventListener(
+        'click',
+        () => {
+
+          editarCategoriaNaLinha(
+            linha,
+            categoria.id,
+            categoria.nome,
+            categoria.descricao
+          )
+
+        }
+      )
+
+
+      btnExcluir.addEventListener(
+        'click',
+        async () => {
+
+          const confirmar =
+            window.confirm(
+              `Deseja excluir a categoria "${categoria.nome}"?`
+            )
+
+          if (!confirmar) {
+            return
+          }
+
+
+          try {
+
+            await window.api.excluirCategoria(
+              categoria.id
+            )
+
+            respostaCategoria.textContent =
+              'Categoria excluída com sucesso!'
+
+            await carregarCategorias()
+
+          } catch (error) {
+
+            console.error(error)
+
+            if (
+              error instanceof Error
+            ) {
+
+              respostaCategoria.textContent =
+                error.message
+
+            } else {
+
+              respostaCategoria.textContent =
+                'Não foi possível excluir a categoria.'
+
+            }
+
+          }
+
+        }
+      )
+
+
+      colunaAcoes.appendChild(
+        btnEditar
+      )
+
+      colunaAcoes.appendChild(
+        btnExcluir
+      )
+
+
+      linha.appendChild(
+        colunaId
+      )
+
+      linha.appendChild(
+        colunaNome
+      )
+
+      linha.appendChild(
+        colunaDescricao
+      )
+
+      linha.appendChild(
+        colunaAcoes
+      )
+
+
+      tabelaCategorias.appendChild(
+        linha
+      )
+
+    })
+
+
+    await carregarCategoriasNoProduto()
+
+    return categorias
+
+  } catch (error) {
+
+    console.error(error)
+
+    respostaCategoria.textContent =
+      'Não foi possível carregar as categorias.'
+
+    return []
+
+  }
+
 }
+
+
+// CADASTRAR CATEGORIA
 
 formCategoria.addEventListener(
   'submit',
   async (event) => {
+
     event.preventDefault()
 
     try {
+
       const nome =
         categoriaNome.value.trim()
 
       const descricao =
         categoriaDescricao.value.trim()
 
-      if (!nome || !descricao) {
+
+      if (!nome) {
+
         respostaCategoria.textContent =
-          'Preencha todos os campos.'
+          'Informe o nome da categoria.'
 
         return
+
       }
+
+
+      if (!descricao) {
+
+        respostaCategoria.textContent =
+          'Informe a descrição da categoria.'
+
+        return
+
+      }
+
 
       const categoria =
         await window.api.cadastrarCategoria(
@@ -99,100 +237,228 @@ formCategoria.addEventListener(
           descricao
         )
 
+
       respostaCategoria.textContent =
         `Categoria "${categoria.nome}" cadastrada com sucesso!`
+
 
       formCategoria.reset()
 
       await carregarCategorias()
+
     } catch (error) {
+
       console.error(error)
 
-      respostaCategoria.textContent =
-        'Erro ao cadastrar categoria.'
+      if (
+        error instanceof Error
+      ) {
+
+        respostaCategoria.textContent =
+          error.message
+
+      } else {
+
+        respostaCategoria.textContent =
+          'Erro ao cadastrar categoria.'
+
+      }
+
     }
+
   }
 )
 
-async function editarCategoria(
+
+// EDITAR CATEGORIA
+
+function editarCategoriaNaLinha(
+  linha: HTMLTableRowElement,
   id: number,
   nomeAtual: string,
   descricaoAtual: string
 ) {
-  const nome =
-    prompt(
-      'Nome da categoria:',
-      nomeAtual
-    )
 
-  if (nome === null) {
-    return
-  }
+  linha.innerHTML = ''
 
-  const descricao =
-    prompt(
-      'Descrição da categoria:',
-      descricaoAtual
-    )
 
-  if (descricao === null) {
-    return
-  }
+  const colunaId =
+    document.createElement('td')
 
-  if (!nome.trim() || !descricao.trim()) {
-    alert(
-      'Preencha todos os campos.'
-    )
+  colunaId.textContent =
+    String(id)
 
-    return
-  }
 
-  try {
-    await window.api.editarCategoria(
-      id,
-      nome.trim(),
-      descricao.trim()
-    )
+  const colunaNome =
+    document.createElement('td')
 
-    alert(
-      'Categoria atualizada com sucesso!'
-    )
 
-    await carregarCategorias()
-  } catch (error) {
-    console.error(error)
+  const campoNome =
+    document.createElement('input')
 
-    alert(
-      'Não foi possível editar a categoria.'
-    )
-  }
+  campoNome.type =
+    'text'
+
+  campoNome.value =
+    nomeAtual
+
+
+  colunaNome.appendChild(
+    campoNome
+  )
+
+
+  const colunaDescricao =
+    document.createElement('td')
+
+
+  const campoDescricao =
+    document.createElement('input')
+
+  campoDescricao.type =
+    'text'
+
+  campoDescricao.value =
+    descricaoAtual
+
+
+  colunaDescricao.appendChild(
+    campoDescricao
+  )
+
+
+  const colunaAcoes =
+    document.createElement('td')
+
+
+  const btnSalvar =
+    document.createElement('button')
+
+  btnSalvar.type =
+    'button'
+
+  btnSalvar.textContent =
+    'Salvar'
+
+
+  const btnCancelar =
+    document.createElement('button')
+
+  btnCancelar.type =
+    'button'
+
+  btnCancelar.textContent =
+    'Cancelar'
+
+
+  btnSalvar.addEventListener(
+    'click',
+    async () => {
+
+      const nome =
+        campoNome.value.trim()
+
+      const descricao =
+        campoDescricao.value.trim()
+
+
+      if (!nome) {
+
+        respostaCategoria.textContent =
+          'Informe o nome da categoria.'
+
+        return
+
+      }
+
+
+      if (!descricao) {
+
+        respostaCategoria.textContent =
+          'Informe a descrição da categoria.'
+
+        return
+
+      }
+
+
+      try {
+
+        await window.api.editarCategoria(
+          id,
+          nome,
+          descricao
+        )
+
+
+        respostaCategoria.textContent =
+          'Categoria atualizada com sucesso!'
+
+
+        await carregarCategorias()
+
+      } catch (error) {
+
+        console.error(error)
+
+        if (
+          error instanceof Error
+        ) {
+
+          respostaCategoria.textContent =
+            error.message
+
+        } else {
+
+          respostaCategoria.textContent =
+            'Não foi possível editar a categoria.'
+
+        }
+
+      }
+
+    }
+  )
+
+
+  btnCancelar.addEventListener(
+    'click',
+    async () => {
+
+      await carregarCategorias()
+
+    }
+  )
+
+
+  colunaAcoes.appendChild(
+    btnSalvar
+  )
+
+  colunaAcoes.appendChild(
+    btnCancelar
+  )
+
+
+  linha.appendChild(
+    colunaId
+  )
+
+  linha.appendChild(
+    colunaNome
+  )
+
+  linha.appendChild(
+    colunaDescricao
+  )
+
+  linha.appendChild(
+    colunaAcoes
+  )
+
 }
 
-async function excluirCategoria(
-  id: number
-) {
-  const confirmar =
-    confirm(
-      `Deseja realmente excluir a categoria ID ${id}?`
-    )
 
-  if (!confirmar) {
-    return
-  }
+// RECARREGAR CATEGORIAS
 
-  try {
-    await window.api.excluirCategoria(id)
-
-    alert(
-      'Categoria excluída com sucesso!'
-    )
-
-    await carregarCategorias()
-  } catch (error) {
-    console.error(error)
-
-    alert(
-      'Não foi possível excluir a categoria. Verifique se existem produtos vinculados.'
-    )
-  }
-}
+carregarCategorias()
