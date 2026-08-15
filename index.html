@@ -3,20 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Gerenciador de Estoque Comercial</title>
   </head>
+
   <body>
     <div id="app">
-      <h1>Gerenciador de Estoque Comercial</h1>
+      <header class="cabecalho">
+        <h1>Gerenciador de Estoque Comercial</h1>
 
-      <!-- MENU DE TELAS -->
+        <p>Sistema de controle de produtos e estoque</p>
+      </header>
 
       <select id="menu-tela">
         <option value="produtos">Produtos</option>
 
-        <option value="categorias">Categorias</option>
-
         <option value="cadastro">Cadastro</option>
+
+        <option value="categorias">Categorias</option>
 
         <option value="movimentacoes">Movimentações</option>
       </select>
@@ -26,21 +30,25 @@
       <section id="tela-produtos">
         <h2>Produtos</h2>
 
-        <button id="btn-produtos">Listar Produtos</button>
+        <button id="btn-produtos" type="button">Listar Produtos</button>
 
-        <button id="btn-criticos">Estoque Crítico</button>
+        <button id="btn-criticos" type="button">Estoque Crítico</button>
 
-        <br />
+        <form id="form-busca">
+          <label for="campo-busca"> Buscar produto </label>
 
-        <input
-          id="campo-busca"
-          type="text"
-          placeholder="Buscar por ID, nome ou código"
-        />
+          <input
+            id="campo-busca"
+            type="text"
+            placeholder="ID, nome ou código"
+          />
 
-        <button id="btn-buscar">Buscar</button>
+          <button id="btn-buscar" type="submit">Buscar</button>
 
-        <button id="btn-limpar">Limpar</button>
+          <button id="btn-limpar" type="button">Limpar</button>
+        </form>
+
+        <p id="erro-busca"></p>
 
         <p id="resposta"></p>
 
@@ -62,49 +70,10 @@
         </table>
       </section>
 
-      <!-- TELA CATEGORIAS -->
-
-      <section id="tela-categorias">
-        <h2>Categorias</h2>
-
-        <form id="form-categoria">
-          <input
-            id="categoria-nome"
-            type="text"
-            placeholder="Nome da categoria"
-            required
-          />
-
-          <input
-            id="categoria-descricao"
-            type="text"
-            placeholder="Descrição"
-            required
-          />
-
-          <button type="submit">Cadastrar Categoria</button>
-        </form>
-
-        <p id="resposta-categoria"></p>
-
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-
-          <tbody id="tabela-categorias"></tbody>
-        </table>
-      </section>
-
       <!-- TELA CADASTRO -->
 
       <section id="tela-cadastro">
-        <h2>Cadastrar Produto</h2>
+        <h2 id="titulo-form-produto">Cadastrar Produto</h2>
 
         <form id="form-produto">
           <input
@@ -134,10 +103,57 @@
             <option value="">Selecione uma categoria</option>
           </select>
 
-          <button type="submit">Cadastrar Produto</button>
+          <button id="btn-salvar-produto" type="submit">
+            Cadastrar Produto
+          </button>
+
+          <button id="btn-cancelar-edicao" type="button">
+            Cancelar edição
+          </button>
         </form>
 
         <p id="resposta-produto"></p>
+
+        <h2>Cadastrar Categoria</h2>
+
+        <form id="form-categoria">
+          <input
+            id="categoria-nome"
+            type="text"
+            placeholder="Nome da categoria"
+            required
+          />
+
+          <input
+            id="categoria-descricao"
+            type="text"
+            placeholder="Descrição"
+            required
+          />
+
+          <button type="submit">Cadastrar Categoria</button>
+        </form>
+
+        <p id="resposta-categoria"></p>
+      </section>
+
+      <!-- TELA CATEGORIAS -->
+
+      <section id="tela-categorias">
+        <h2>Categorias</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody id="tabela-categorias"></tbody>
+        </table>
       </section>
 
       <!-- TELA MOVIMENTAÇÕES -->
