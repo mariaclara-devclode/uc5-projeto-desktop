@@ -3,21 +3,35 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-export const pool =
-  new Pool({
-    connectionString:
-      process.env.DATABASE_URL,
-  })
+const databaseUrl = process.env.DATABASE_URL
+
+console.log(
+  'DATABASE_URL carregada:',
+  Boolean(databaseUrl)
+)
+
+if (!databaseUrl) {
+  throw new Error(
+    'DATABASE_URL não foi encontrada no arquivo .env'
+  )
+}
+
+export const pool = new Pool({
+  connectionString: databaseUrl,
+})
 
 pool.connect()
-  .then(() => {
+  .then((client) => {
     console.log(
       'Banco conectado com sucesso!'
     )
+
+    client.release()
   })
   .catch((erro) => {
     console.error(
-      'Erro ao conectar:',
-      erro
+      'Erro ao conectar ao banco:'
     )
+
+    console.error(erro)
   })
