@@ -1,25 +1,24 @@
-// TELAS
+import { menuTela
+} from './interface'
+
 
 export const TELA_PRODUTOS =
   'produtos'
 
+
 export const TELA_CADASTRO =
   'cadastro'
 
+
 export const TELA_CATEGORIAS =
   'categorias'
+
 
 export const TELA_MOVIMENTACOES =
   'movimentacoes'
 
 
 export function configurarMenuTelas() {
-
-  const menuTela =
-    document.getElementById(
-      'menu-tela'
-    ) as HTMLSelectElement
-
 
   const telaProdutos =
     document.getElementById(
