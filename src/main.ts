@@ -364,7 +364,8 @@ ipcMain.handle(
         error
       )
 
-      throw error
+      throw new Error(
+       'Não foi possível consultar os produtos. Verifique a conexão.')
     }
   }
 )
