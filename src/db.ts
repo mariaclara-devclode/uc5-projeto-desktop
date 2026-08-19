@@ -18,6 +18,10 @@ if (!databaseUrl) {
 
 export const pool = new Pool({
   connectionString: databaseUrl,
+
+  ssl: {
+    rejectUnauthorized: false,
+  },
 })
 
 pool.connect()
