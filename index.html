@@ -2,40 +2,97 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Gerenciador de Estoque Comercial</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+    />
+
+    <link
+      rel="stylesheet"
+      href="/src/style.css"
+    />
+
+    <title>
+      Gerenciador de Estoque Comercial
+    </title>
   </head>
 
   <body>
-    <div id="app">
-      <header class="cabecalho">
-        <h1>Gerenciador de Estoque Comercial</h1>
 
-        <p>Sistema de controle de produtos e estoque</p>
+    <div id="app">
+
+      <!-- CABEÇALHO -->
+
+      <header class="cabecalho">
+
+        <h1>
+          Gerenciador de Estoque Comercial
+        </h1>
+
+        <p>
+          Sistema de controle de produtos e estoque
+        </p>
+
       </header>
 
+
+      <!-- MENU -->
+
       <select id="menu-tela">
-        <option value="produtos">Produtos</option>
 
-        <option value="cadastro">Cadastro</option>
+        <option value="produtos">
+          Produtos
+        </option>
 
-        <option value="categorias">Categorias</option>
+        <option value="cadastro">
+          Cadastro
+        </option>
 
-        <option value="movimentacoes">Movimentações</option>
+        <option value="categorias">
+          Categorias
+        </option>
+
+        <option value="movimentacoes">
+          Movimentações
+        </option>
+
       </select>
+
 
       <!-- TELA PRODUTOS -->
 
       <section id="tela-produtos">
-        <h2>Produtos</h2>
 
-        <button id="btn-produtos" type="button">Listar Produtos</button>
+        <h2>
+          Produtos
+        </h2>
 
-        <button id="btn-criticos" type="button">Estoque Crítico</button>
+        <button
+          id="btn-produtos"
+          type="button"
+        >
+          Listar Produtos
+        </button>
+
+        <button
+          id="btn-criticos"
+          type="button"
+        >
+          Estoque Crítico
+        </button>
+
 
         <form id="form-busca">
-          <label for="campo-busca"> Buscar produto </label>
+
+          <label for="campo-busca">
+            Buscar produto
+          </label>
 
           <input
             id="campo-busca"
@@ -43,18 +100,34 @@
             placeholder="ID, nome ou código"
           />
 
-          <button id="btn-buscar" type="submit">Buscar</button>
+          <button
+            id="btn-buscar"
+            type="submit"
+          >
+            Buscar
+          </button>
 
-          <button id="btn-limpar" type="button">Limpar</button>
+          <button
+            id="btn-limpar"
+            type="button"
+          >
+            Limpar
+          </button>
+
         </form>
+
 
         <p id="erro-busca"></p>
 
         <p id="resposta"></p>
 
+
         <table>
+
           <thead>
+
             <tr>
+
               <th>ID</th>
               <th>Nome</th>
               <th>Código</th>
@@ -63,19 +136,29 @@
               <th>Estoque</th>
               <th>Status</th>
               <th>Ações</th>
+
             </tr>
+
           </thead>
 
           <tbody id="tabela-produtos"></tbody>
+
         </table>
+
       </section>
+
 
       <!-- TELA CADASTRO -->
 
       <section id="tela-cadastro">
-        <h2 id="titulo-form-produto">Cadastrar Produto</h2>
+
+        <h2 id="titulo-form-produto">
+          Cadastrar Produto
+        </h2>
+
 
         <form id="form-produto">
+
           <input
             id="produto-nome"
             type="text"
@@ -99,24 +182,46 @@
             required
           />
 
-          <select id="produto-categoria" required>
-            <option value="">Selecione uma categoria</option>
+          <select
+            id="produto-categoria"
+            required
+          >
+
+            <option value="">
+              Selecione uma categoria
+            </option>
+
           </select>
 
-          <button id="btn-salvar-produto" type="submit">
+
+          <button
+            id="btn-salvar-produto"
+            type="submit"
+          >
             Cadastrar Produto
           </button>
 
-          <button id="btn-cancelar-edicao" type="button">
+
+          <button
+            id="btn-cancelar-edicao"
+            type="button"
+          >
             Cancelar edição
           </button>
+
         </form>
+
 
         <p id="resposta-produto"></p>
 
-        <h2>Cadastrar Categoria</h2>
+
+        <h2>
+          Cadastrar Categoria
+        </h2>
+
 
         <form id="form-categoria">
+
           <input
             id="categoria-nome"
             type="text"
@@ -131,40 +236,72 @@
             required
           />
 
-          <button type="submit">Cadastrar Categoria</button>
+          <button type="submit">
+            Cadastrar Categoria
+          </button>
+
         </form>
 
+
         <p id="resposta-categoria"></p>
+
       </section>
+
 
       <!-- TELA CATEGORIAS -->
 
       <section id="tela-categorias">
-        <h2>Categorias</h2>
+
+        <h2>
+          Categorias
+        </h2>
+
 
         <table>
+
           <thead>
+
             <tr>
+
               <th>ID</th>
               <th>Nome</th>
               <th>Descrição</th>
               <th>Ações</th>
+
             </tr>
+
           </thead>
 
+
           <tbody id="tabela-categorias"></tbody>
+
         </table>
+
       </section>
+
 
       <!-- TELA MOVIMENTAÇÕES -->
 
       <section id="tela-movimentacoes">
-        <h2>Registrar Movimentação</h2>
+
+        <h2>
+          Registrar Movimentação
+        </h2>
+
 
         <form id="form-movimentacao">
-          <select id="movimentacao-produto" required>
-            <option value="">Selecione um produto</option>
+
+          <select
+            id="movimentacao-produto"
+            required
+          >
+
+            <option value="">
+              Selecione um produto
+            </option>
+
           </select>
+
 
           <input
             id="movimentacao-quantidade"
@@ -174,21 +311,45 @@
             required
           />
 
-          <select id="movimentacao-tipo" required>
-            <option value="">Selecione o tipo</option>
 
-            <option value="entrada">Entrada</option>
+          <select
+            id="movimentacao-tipo"
+            required
+          >
 
-            <option value="saida">Saída</option>
+            <option value="">
+              Selecione o tipo
+            </option>
+
+            <option value="entrada">
+              Entrada
+            </option>
+
+            <option value="saida">
+              Saída
+            </option>
+
           </select>
 
-          <button type="submit">Registrar Movimentação</button>
+
+          <button type="submit">
+            Registrar Movimentação
+          </button>
+
         </form>
 
+
         <p id="resposta-movimentacao"></p>
+
       </section>
+
     </div>
 
-    <script type="module" src="/src/renderer.ts"></script>
+
+    <script
+      type="module"
+      src="/src/renderer.ts"
+    ></script>
+
   </body>
 </html>
