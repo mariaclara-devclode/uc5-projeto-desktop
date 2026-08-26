@@ -1,8 +1,9 @@
-import {app,BrowserWindow,ipcMain,Menu,} from 'electron'
+import {app, BrowserWindow,ipcMain,Menu, } from 'electron'
 
 import path from 'path'
 import dotenv from 'dotenv'
 import { pool } from './db'
+import { ErroValidacao,comTratamento,registrarErro,} from './erros'
 
 dotenv.config()
 
@@ -17,6 +18,7 @@ console.log(
 let mainWindow:
   | BrowserWindow
   | null = null
+
 
 // JANELA PRINCIPAL
 
@@ -82,6 +84,7 @@ function createWindow() {
   )
 }
 
+
 // MENU
 
 function createMenu() {
@@ -133,6 +136,7 @@ function createMenu() {
   Menu.setApplicationMenu(menu)
 }
 
+
 // INICIALIZAÇÃO
 
 app.whenReady().then(
@@ -148,6 +152,11 @@ app.whenReady().then(
     } catch (error) {
       console.error(
         'Erro ao conectar ao banco:',
+        error
+      )
+
+      registrarErro(
+        'inicializacao',
         error
       )
     }
@@ -171,6 +180,7 @@ app.whenReady().then(
   }
 )
 
+
 // ENCERRAMENTO
 
 app.on(
@@ -193,462 +203,449 @@ app.on(
   }
 )
 
+
 // PING IPC
 
 ipcMain.handle(
   'canal-ping',
-  async () => {
-    return 'pong do processo principal!'
-  }
+
+  () =>
+    comTratamento(
+      'canal-ping',
+
+      async () => {
+        return 'pong do processo principal!'
+      }
+    )
 )
+
 
 // LISTAR PRODUTOS
 
 ipcMain.handle(
   'listar-produtos',
 
-  async () => {
-    try {
-      const resultado =
-        await pool.query(`
-          SELECT
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome AS categoria,
+  () =>
+    comTratamento(
+      'listar-produtos',
 
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN m.tipo = 'entrada'
-                    THEN m.quantidade
+      async () => {
+        const resultado =
+          await pool.query(`
+            SELECT
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome AS categoria,
 
-                  WHEN m.tipo = 'saida'
-                    THEN -m.quantidade
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN m.tipo = 'entrada'
+                      THEN m.quantidade
 
-                  ELSE 0
-                END
+                    WHEN m.tipo = 'saida'
+                      THEN -m.quantidade
+
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS estoque
+
+            FROM produtos p
+
+            INNER JOIN categorias c
+              ON p.id_categoria = c.id
+
+            LEFT JOIN movimentacoes m
+              ON p.id = m.id_produto
+
+            GROUP BY
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome
+
+            ORDER BY p.id
+          `)
+
+        return resultado.rows.map(
+          (produto) => ({
+            ...produto,
+
+            preco_venda:
+              Number(
+                produto.preco_venda
               ),
-              0
-            ) AS estoque
 
-          FROM produtos p
-
-          INNER JOIN categorias c
-            ON p.id_categoria = c.id
-
-          LEFT JOIN movimentacoes m
-            ON p.id = m.id_produto
-
-          GROUP BY
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome
-
-          ORDER BY p.id
-        `)
-
-      return resultado.rows.map(
-        (produto) => ({
-          ...produto,
-
-          preco_venda:
-            Number(
-              produto.preco_venda
-            ),
-
-          estoque:
-            Number(
-              produto.estoque
-            ),
-        })
-      )
-    } catch (error) {
-      console.error(
-        'Erro ao listar produtos:',
-        error
-      )
-
-      throw error
-    }
-  }
+            estoque:
+              Number(
+                produto.estoque
+              ),
+          })
+        )
+      }
+    )
 )
+
 
 // BUSCAR PRODUTOS
 
 ipcMain.handle(
   'buscar-produtos',
 
-  async (
+  (
     _event,
     termo: string
-  ) => {
-    try {
-      const busca =
-        termo.trim()
+  ) =>
+    comTratamento(
+      'buscar-produtos',
 
-      const resultado =
-        await pool.query(
-          `
-          SELECT
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome AS categoria,
+      async () => {
+        const busca =
+          termo.trim()
 
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN m.tipo = 'entrada'
-                    THEN m.quantidade
+        const resultado =
+          await pool.query(
+            `
+            SELECT
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome AS categoria,
 
-                  WHEN m.tipo = 'saida'
-                    THEN -m.quantidade
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN m.tipo = 'entrada'
+                      THEN m.quantidade
 
-                  ELSE 0
-                END
+                    WHEN m.tipo = 'saida'
+                      THEN -m.quantidade
+
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS estoque
+
+            FROM produtos p
+
+            INNER JOIN categorias c
+              ON p.id_categoria = c.id
+
+            LEFT JOIN movimentacoes m
+              ON p.id = m.id_produto
+
+            WHERE
+              p.id::text = $1
+              OR p.codigo_barras = $1
+              OR p.nome ILIKE $2
+
+            GROUP BY
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome
+
+            ORDER BY p.id
+            `,
+            [
+              busca,
+              `%${busca}%`,
+            ]
+          )
+
+        return resultado.rows.map(
+          (produto) => ({
+            ...produto,
+
+            preco_venda:
+              Number(
+                produto.preco_venda
               ),
-              0
-            ) AS estoque
 
-          FROM produtos p
-
-          INNER JOIN categorias c
-            ON p.id_categoria = c.id
-
-          LEFT JOIN movimentacoes m
-            ON p.id = m.id_produto
-
-          WHERE
-            p.id::text = $1
-            OR p.codigo_barras = $1
-            OR p.nome ILIKE $2
-
-          GROUP BY
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome
-
-          ORDER BY p.id
-          `,
-          [
-            busca,
-            `%${busca}%`,
-          ]
+            estoque:
+              Number(
+                produto.estoque
+              ),
+          })
         )
-
-      return resultado.rows.map(
-        (produto) => ({
-          ...produto,
-
-          preco_venda:
-            Number(
-              produto.preco_venda
-            ),
-
-          estoque:
-            Number(
-              produto.estoque
-            ),
-        })
-      )
-    } catch (error) {
-      console.error(
-        'Erro ao buscar produtos:',
-        error
-      )
-
-      throw new Error(
-       'Não foi possível consultar os produtos. Verifique a conexão.')
-    }
-  }
+      }
+    )
 )
+
 
 // ESTOQUE CRÍTICO
 
 ipcMain.handle(
   'listar-estoque-critico',
 
-  async () => {
-    try {
-      const resultado =
-        await pool.query(`
-          SELECT
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome AS categoria,
+  () =>
+    comTratamento(
+      'listar-estoque-critico',
 
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN m.tipo = 'entrada'
-                    THEN m.quantidade
+      async () => {
+        const resultado =
+          await pool.query(`
+            SELECT
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome AS categoria,
 
-                  WHEN m.tipo = 'saida'
-                    THEN -m.quantidade
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN m.tipo = 'entrada'
+                      THEN m.quantidade
 
-                  ELSE 0
-                END
+                    WHEN m.tipo = 'saida'
+                      THEN -m.quantidade
+
+                    ELSE 0
+                  END
+                ),
+                0
+              ) AS estoque
+
+            FROM produtos p
+
+            INNER JOIN categorias c
+              ON p.id_categoria = c.id
+
+            LEFT JOIN movimentacoes m
+              ON p.id = m.id_produto
+
+            GROUP BY
+              p.id,
+              p.nome,
+              p.codigo_barras,
+              p.preco_venda,
+              c.nome
+
+            HAVING
+              COALESCE(
+                SUM(
+                  CASE
+                    WHEN m.tipo = 'entrada'
+                      THEN m.quantidade
+
+                    WHEN m.tipo = 'saida'
+                      THEN -m.quantidade
+
+                    ELSE 0
+                  END
+                ),
+                0
+              ) <= 10
+
+            ORDER BY estoque ASC
+          `)
+
+        return resultado.rows.map(
+          (produto) => ({
+            ...produto,
+
+            preco_venda:
+              Number(
+                produto.preco_venda
               ),
-              0
-            ) AS estoque
 
-          FROM produtos p
-
-          INNER JOIN categorias c
-            ON p.id_categoria = c.id
-
-          LEFT JOIN movimentacoes m
-            ON p.id = m.id_produto
-
-          GROUP BY
-            p.id,
-            p.nome,
-            p.codigo_barras,
-            p.preco_venda,
-            c.nome
-
-          HAVING
-            COALESCE(
-              SUM(
-                CASE
-                  WHEN m.tipo = 'entrada'
-                    THEN m.quantidade
-
-                  WHEN m.tipo = 'saida'
-                    THEN -m.quantidade
-
-                  ELSE 0
-                END
+            estoque:
+              Number(
+                produto.estoque
               ),
-              0
-            ) <= 10
-
-          ORDER BY estoque ASC
-        `)
-
-      return resultado.rows.map(
-        (produto) => ({
-          ...produto,
-
-          preco_venda:
-            Number(
-              produto.preco_venda
-            ),
-
-          estoque:
-            Number(
-              produto.estoque
-            ),
-        })
-      )
-    } catch (error) {
-      console.error(
-        'Erro ao buscar estoque crítico:',
-        error
-      )
-
-      throw error
-    }
-  }
+          })
+        )
+      }
+    )
 )
+
 
 // LISTAR CATEGORIAS
 
 ipcMain.handle(
   'listar-categorias',
 
-  async () => {
-    try {
-      const resultado =
-        await pool.query(`
-          SELECT
-            id,
-            nome,
-            descricao
+  () =>
+    comTratamento(
+      'listar-categorias',
 
-          FROM categorias
+      async () => {
+        const resultado =
+          await pool.query(`
+            SELECT
+              id,
+              nome,
+              descricao
 
-          ORDER BY id
-        `)
+            FROM categorias
 
-      return resultado.rows
-    } catch (error) {
-      console.error(
-        'Erro ao listar categorias:',
-        error
-      )
+            ORDER BY id
+          `)
 
-      throw error
-    }
-  }
+        return resultado.rows
+      }
+    )
 )
+
 
 // CADASTRAR CATEGORIA
 
 ipcMain.handle(
   'cadastrar-categoria',
 
-  async (
+  (
     _event,
     dados: {
       nome: string
       descricao: string
     }
-  ) => {
-    try {
-      const resultado =
-        await pool.query(
-          `
-          INSERT INTO categorias
-            (
+  ) =>
+    comTratamento(
+      'cadastrar-categoria',
+
+      async () => {
+        const resultado =
+          await pool.query(
+            `
+            INSERT INTO categorias
+              (
+                nome,
+                descricao
+              )
+
+            VALUES
+              ($1, $2)
+
+            RETURNING
+              id,
               nome,
               descricao
-            )
+            `,
+            [
+              dados.nome,
+              dados.descricao,
+            ]
+          )
 
-          VALUES
-            ($1, $2)
-
-          RETURNING
-            id,
-            nome,
-            descricao
-          `,
-          [
-            dados.nome,
-            dados.descricao,
-          ]
-        )
-
-      return resultado.rows[0]
-    } catch (error) {
-      console.error(
-        'Erro ao cadastrar categoria:',
-        error
-      )
-
-      throw error
-    }
-  }
+        return resultado.rows[0]
+      }
+    )
 )
+
 
 // EDITAR CATEGORIA
 
 ipcMain.handle(
   'editar-categoria',
 
-  async (
+  (
     _event,
     dados: {
       id: number
       nome: string
       descricao: string
     }
-  ) => {
-    try {
-      const resultado =
-        await pool.query(
-          `
-          UPDATE categorias
+  ) =>
+    comTratamento(
+      'editar-categoria',
 
-          SET
-            nome = $1,
-            descricao = $2
+      async () => {
+        const resultado =
+          await pool.query(
+            `
+            UPDATE categorias
 
-          WHERE id = $3
+            SET
+              nome = $1,
+              descricao = $2
 
-          RETURNING
-            id,
-            nome,
-            descricao
-          `,
-          [
-            dados.nome,
-            dados.descricao,
-            dados.id,
-          ]
-        )
+            WHERE id = $3
 
-      if (
-        resultado.rows.length === 0
-      ) {
-        throw new Error(
-          'Categoria não encontrada.'
-        )
+            RETURNING
+              id,
+              nome,
+              descricao
+            `,
+            [
+              dados.nome,
+              dados.descricao,
+              dados.id,
+            ]
+          )
+
+        if (
+          resultado.rows.length === 0
+        ) {
+          throw new ErroValidacao(
+            'Categoria não encontrada.'
+          )
+        }
+
+        return resultado.rows[0]
       }
-
-      return resultado.rows[0]
-    } catch (error) {
-      console.error(
-        'Erro ao editar categoria:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
+
 
 // EXCLUIR CATEGORIA
 
 ipcMain.handle(
   'excluir-categoria',
 
-  async (
+  (
     _event,
     id: number
-  ) => {
-    try {
-      const resultado =
-        await pool.query(
-          `
-          DELETE FROM categorias
+  ) =>
+    comTratamento(
+      'excluir-categoria',
 
-          WHERE id = $1
+      async () => {
+        const resultado =
+          await pool.query(
+            `
+            DELETE FROM categorias
 
-          RETURNING id
-          `,
-          [id]
-        )
+            WHERE id = $1
 
-      if (
-        resultado.rows.length === 0
-      ) {
-        throw new Error(
-          'Categoria não encontrada.'
-        )
+            RETURNING id
+            `,
+            [id]
+          )
+
+        if (
+          resultado.rows.length === 0
+        ) {
+          throw new ErroValidacao(
+            'Categoria não encontrada.'
+          )
+        }
+
+        return {
+          sucesso: true,
+
+          id:
+            resultado.rows[0].id,
+        }
       }
-
-      return {
-        sucesso: true,
-        id:
-          resultado.rows[0].id,
-      }
-    } catch (error) {
-      console.error(
-        'Erro ao excluir categoria:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
+
 
 // CADASTRAR PRODUTO
 
 ipcMain.handle(
   'cadastrar-produto',
 
-  async (
+  (
     _event,
     dados: {
       nome: string
@@ -656,63 +653,60 @@ ipcMain.handle(
       preco_venda: number
       id_categoria: number
     }
-  ) => {
-    try {
-      const resultado =
-        await pool.query(
-          `
-          INSERT INTO produtos
-            (
+  ) =>
+    comTratamento(
+      'cadastrar-produto',
+
+      async () => {
+        const resultado =
+          await pool.query(
+            `
+            INSERT INTO produtos
+              (
+                nome,
+                codigo_barras,
+                preco_venda,
+                id_categoria
+              )
+
+            VALUES
+              ($1, $2, $3, $4)
+
+            RETURNING
+              id,
               nome,
               codigo_barras,
               preco_venda,
               id_categoria
-            )
+            `,
+            [
+              dados.nome,
+              dados.codigo_barras,
+              dados.preco_venda,
+              dados.id_categoria,
+            ]
+          )
 
-          VALUES
-            ($1, $2, $3, $4)
+        return {
+          ...resultado.rows[0],
 
-          RETURNING
-            id,
-            nome,
-            codigo_barras,
-            preco_venda,
-            id_categoria
-          `,
-          [
-            dados.nome,
-            dados.codigo_barras,
-            dados.preco_venda,
-            dados.id_categoria,
-          ]
-        )
-
-      return {
-        ...resultado.rows[0],
-
-        preco_venda:
-          Number(
-            resultado.rows[0]
-              .preco_venda
-          ),
+          preco_venda:
+            Number(
+              resultado.rows[0]
+                .preco_venda
+            ),
+        }
       }
-    } catch (error) {
-      console.error(
-        'Erro ao cadastrar produto:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
+
 
 // EDITAR PRODUTO
 
 ipcMain.handle(
   'editar-produto',
 
-  async (
+  (
     _event,
     dados: {
       id: number
@@ -721,137 +715,130 @@ ipcMain.handle(
       preco_venda: number
       id_categoria: number
     }
-  ) => {
-    try {
-      const resultado =
-        await pool.query(
-          `
-          UPDATE produtos
+  ) =>
+    comTratamento(
+      'editar-produto',
 
-          SET
-            nome = $1,
-            codigo_barras = $2,
-            preco_venda = $3,
-            id_categoria = $4
+      async () => {
+        const resultado =
+          await pool.query(
+            `
+            UPDATE produtos
 
-          WHERE id = $5
+            SET
+              nome = $1,
+              codigo_barras = $2,
+              preco_venda = $3,
+              id_categoria = $4
 
-          RETURNING
-            id,
-            nome,
-            codigo_barras,
-            preco_venda,
-            id_categoria
-          `,
-          [
-            dados.nome,
-            dados.codigo_barras,
-            dados.preco_venda,
-            dados.id_categoria,
-            dados.id,
-          ]
-        )
+            WHERE id = $5
 
-      if (
-        resultado.rows.length === 0
-      ) {
-        throw new Error(
-          'Produto não encontrado.'
-        )
+            RETURNING
+              id,
+              nome,
+              codigo_barras,
+              preco_venda,
+              id_categoria
+            `,
+            [
+              dados.nome,
+              dados.codigo_barras,
+              dados.preco_venda,
+              dados.id_categoria,
+              dados.id,
+            ]
+          )
+
+        if (
+          resultado.rows.length === 0
+        ) {
+          throw new ErroValidacao(
+            'Produto não encontrado.'
+          )
+        }
+
+        return {
+          ...resultado.rows[0],
+
+          preco_venda:
+            Number(
+              resultado.rows[0]
+                .preco_venda
+            ),
+        }
       }
-
-      return {
-        ...resultado.rows[0],
-
-        preco_venda:
-          Number(
-            resultado.rows[0]
-              .preco_venda
-          ),
-      }
-    } catch (error) {
-      console.error(
-        'Erro ao editar produto:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
+
 
 // EXCLUIR PRODUTO
 
 ipcMain.handle(
   'excluir-produto',
 
-  async (
+  (
     _event,
     id: number
-  ) => {
-    try {
+  ) =>
+    comTratamento(
+      'excluir-produto',
 
-      // Verifica se existem
-      // movimentações vinculadas
+      async () => {
 
-      const movimentacoes =
-        await pool.query(
-          `
-          SELECT id
+        // Verifica se existem
+        // movimentações vinculadas
 
-          FROM movimentacoes
+        const movimentacoes =
+          await pool.query(
+            `
+            SELECT id
 
-          WHERE id_produto = $1
+            FROM movimentacoes
 
-          LIMIT 1
-          `,
-          [id]
-        )
+            WHERE id_produto = $1
 
-      if (
-        movimentacoes.rows.length > 0
-      ) {
-        throw new Error(
-          'Não é possível excluir este produto porque existem movimentações registradas.'
-        )
+            LIMIT 1
+            `,
+            [id]
+          )
+
+        if (
+          movimentacoes.rows.length > 0
+        ) {
+          throw new ErroValidacao(
+            'Não é possível excluir este produto porque existem movimentações registradas.'
+          )
+        }
+
+
+        const resultado =
+          await pool.query(
+            `
+            DELETE FROM produtos
+
+            WHERE id = $1
+
+            RETURNING id
+            `,
+            [id]
+          )
+
+        if (
+          resultado.rows.length === 0
+        ) {
+          throw new ErroValidacao(
+            'Produto não encontrado.'
+          )
+        }
+
+        return {
+          sucesso: true,
+
+          id:
+            resultado.rows[0].id,
+        }
       }
-
-
-      const resultado =
-        await pool.query(
-          `
-          DELETE FROM produtos
-
-          WHERE id = $1
-
-          RETURNING id
-          `,
-          [id]
-        )
-
-      if (
-        resultado.rows.length === 0
-      ) {
-        throw new Error(
-          'Produto não encontrado.'
-        )
-      }
-
-      return {
-        sucesso: true,
-
-        id:
-          resultado.rows[0].id,
-      }
-    } catch (error) {
-      console.error(
-        'Erro ao excluir produto:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
 
 
@@ -860,7 +847,7 @@ ipcMain.handle(
 ipcMain.handle(
   'registrar-movimentacao',
 
-  async (
+  (
     _event,
     dados: {
       id_produto: number
@@ -869,117 +856,112 @@ ipcMain.handle(
         | 'entrada'
         | 'saida'
     }
-  ) => {
-    try {
+  ) =>
+    comTratamento(
+      'registrar-movimentacao',
 
-      if (
-        dados.quantidade <= 0
-      ) {
-        throw new Error(
-          'A quantidade deve ser maior que zero.'
-        )
-      }
+      async () => {
 
-
-      if (
-        dados.tipo !== 'entrada' &&
-        dados.tipo !== 'saida'
-      ) {
-        throw new Error(
-          'Tipo de movimentação inválido.'
-        )
-      }
+        if (
+          dados.quantidade <= 0
+        ) {
+          throw new ErroValidacao(
+            'A quantidade deve ser maior que zero.'
+          )
+        }
 
 
-      // Verifica estoque antes
-      // de registrar uma saída
+        if (
+          dados.tipo !== 'entrada' &&
+          dados.tipo !== 'saida'
+        ) {
+          throw new ErroValidacao(
+            'Tipo de movimentação inválido.'
+          )
+        }
 
-      if (
-        dados.tipo === 'saida'
-      ) {
-        const estoqueResult =
+
+        // Verifica estoque antes
+        // de registrar uma saída
+
+        if (
+          dados.tipo === 'saida'
+        ) {
+          const estoqueResult =
+            await pool.query(
+              `
+              SELECT
+                COALESCE(
+                  SUM(
+                    CASE
+                      WHEN tipo = 'entrada'
+                        THEN quantidade
+
+                      WHEN tipo = 'saida'
+                        THEN -quantidade
+
+                      ELSE 0
+                    END
+                  ),
+                  0
+                ) AS estoque
+
+              FROM movimentacoes
+
+              WHERE id_produto = $1
+              `,
+              [
+                dados.id_produto,
+              ]
+            )
+
+          const estoqueAtual =
+            Number(
+              estoqueResult.rows[0]
+                .estoque
+            )
+
+          if (
+            dados.quantidade >
+            estoqueAtual
+          ) {
+            throw new ErroValidacao(
+              `Estoque insuficiente. Estoque atual: ${estoqueAtual}.`
+            )
+          }
+        }
+
+
+        const resultado =
           await pool.query(
             `
-            SELECT
-              COALESCE(
-                SUM(
-                  CASE
-                    WHEN tipo = 'entrada'
-                      THEN quantidade
+            INSERT INTO movimentacoes
+              (
+                id_produto,
+                quantidade,
+                tipo
+              )
 
-                    WHEN tipo = 'saida'
-                      THEN -quantidade
+            VALUES
+              ($1, $2, $3)
 
-                    ELSE 0
-                  END
-                ),
-                0
-              ) AS estoque
-
-            FROM movimentacoes
-
-            WHERE id_produto = $1
+            RETURNING
+              id,
+              id_produto,
+              quantidade,
+              tipo,
+              data
             `,
             [
               dados.id_produto,
+              dados.quantidade,
+              dados.tipo,
             ]
           )
 
-        const estoqueAtual =
-          Number(
-            estoqueResult.rows[0]
-              .estoque
-          )
-
-        if (
-          dados.quantidade >
-          estoqueAtual
-        ) {
-          throw new Error(
-            `Estoque insuficiente. Estoque atual: ${estoqueAtual}.`
-          )
-        }
+        return resultado.rows[0]
       }
-
-
-      const resultado =
-        await pool.query(
-          `
-          INSERT INTO movimentacoes
-            (
-              id_produto,
-              quantidade,
-              tipo
-            )
-
-          VALUES
-            ($1, $2, $3)
-
-          RETURNING
-            id,
-            id_produto,
-            quantidade,
-            tipo,
-            data
-          `,
-          [
-            dados.id_produto,
-            dados.quantidade,
-            dados.tipo,
-          ]
-        )
-
-      return resultado.rows[0]
-
-    } catch (error) {
-      console.error(
-        'Erro ao registrar movimentação:',
-        error
-      )
-
-      throw error
-    }
-  }
+    )
 )
 
 
