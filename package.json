@@ -23,8 +23,13 @@
     "vite-plugin-electron-renderer": "^1.0.0"
   },
   "build": {
-    "appId":"com.gerenciadorestoquecomercial.app",
+    "appId":"br.com.mariaclara.gerenciadorestoquecomercial",
     "productName": "Gerenciador de Estoque Comercial",
+
+    "directories": {
+      "output": "release"
+    },
+
     "win": {
       "target": "nsis",
       "requestedExecutionLevel": "asInvoker"
