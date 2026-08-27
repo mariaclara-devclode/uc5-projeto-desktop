@@ -1,10 +1,29 @@
+// MENU DE NAVEGAÇÃO
 
-// MENU
-
-export const menuTela =
+export const btnVoltar =
   document.getElementById(
-    'menu-tela'
-  ) as HTMLSelectElement
+    'btn-voltar'
+  ) as HTMLButtonElement
+
+export const navProdutos =
+  document.getElementById(
+    'nav-produtos'
+  ) as HTMLButtonElement
+
+export const navCadastro =
+  document.getElementById(
+    'nav-cadastro'
+  ) as HTMLButtonElement
+
+export const navCategorias =
+  document.getElementById(
+    'nav-categorias'
+  ) as HTMLButtonElement
+
+export const navMovimentacoes =
+  document.getElementById(
+    'nav-movimentacoes'
+  ) as HTMLButtonElement
 
 
 // PRODUTOS
@@ -14,48 +33,40 @@ export const btnProdutos =
     'btn-produtos'
   ) as HTMLButtonElement
 
-
 export const btnCriticos =
   document.getElementById(
     'btn-criticos'
   ) as HTMLButtonElement
-
 
 export const formBusca =
   document.getElementById(
     'form-busca'
   ) as HTMLFormElement
 
-
 export const campoBusca =
   document.getElementById(
     'campo-busca'
   ) as HTMLInputElement
-
 
 export const btnBuscar =
   document.getElementById(
     'btn-buscar'
   ) as HTMLButtonElement
 
-
 export const btnLimpar =
   document.getElementById(
     'btn-limpar'
   ) as HTMLButtonElement
-
 
 export const erroBusca =
   document.getElementById(
     'erro-busca'
   ) as HTMLParagraphElement
 
-
 export const resposta =
   document.getElementById(
     'resposta'
   ) as HTMLParagraphElement
-
 
 export const tabelaProdutos =
   document.getElementById(
@@ -70,48 +81,40 @@ export const formProduto =
     'form-produto'
   ) as HTMLFormElement
 
-
 export const produtoNome =
   document.getElementById(
     'produto-nome'
   ) as HTMLInputElement
-
 
 export const produtoCodigo =
   document.getElementById(
     'produto-codigo'
   ) as HTMLInputElement
 
-
 export const produtoPreco =
   document.getElementById(
     'produto-preco'
   ) as HTMLInputElement
-
 
 export const produtoCategoria =
   document.getElementById(
     'produto-categoria'
   ) as HTMLSelectElement
 
-
 export const respostaProduto =
   document.getElementById(
     'resposta-produto'
   ) as HTMLParagraphElement
-
 
 export const tituloFormProduto =
   document.getElementById(
     'titulo-form-produto'
   ) as HTMLHeadingElement
 
-
 export const btnSalvarProduto =
   document.getElementById(
     'btn-salvar-produto'
   ) as HTMLButtonElement
-
 
 export const btnCancelarEdicao =
   document.getElementById(
@@ -126,24 +129,20 @@ export const formCategoria =
     'form-categoria'
   ) as HTMLFormElement
 
-
 export const categoriaNome =
   document.getElementById(
     'categoria-nome'
   ) as HTMLInputElement
-
 
 export const categoriaDescricao =
   document.getElementById(
     'categoria-descricao'
   ) as HTMLInputElement
 
-
 export const respostaCategoria =
   document.getElementById(
     'resposta-categoria'
   ) as HTMLParagraphElement
-
 
 export const tabelaCategorias =
   document.getElementById(
@@ -158,24 +157,20 @@ export const formMovimentacao =
     'form-movimentacao'
   ) as HTMLFormElement
 
-
 export const movimentacaoProduto =
   document.getElementById(
     'movimentacao-produto'
   ) as HTMLSelectElement
-
 
 export const movimentacaoQuantidade =
   document.getElementById(
     'movimentacao-quantidade'
   ) as HTMLInputElement
 
-
 export const movimentacaoTipo =
   document.getElementById(
     'movimentacao-tipo'
   ) as HTMLSelectElement
-
 
 export const respostaMovimentacao =
   document.getElementById(
