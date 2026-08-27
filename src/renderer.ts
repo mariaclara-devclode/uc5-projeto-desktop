@@ -1,8 +1,10 @@
 import './interface'
 
+
 import {
   configurarMenuTelas
 } from './telas'
+
 
 import {
   carregarProdutos,
@@ -10,22 +12,25 @@ import {
   carregarProdutosMovimentacao
 } from './produtos'
 
+
 import {
   carregarCategorias
 } from './categorias'
 
+
 import './movimentacoes'
 
 
-// Extrai a mensagem amigável que o Main preparou.
-// Se não houver, vale o texto alternativo escolhido pela própria tela.
+// EXTRAI A MENSAGEM AMIGÁVEL
 
 function mensagemDoErro(
   erro: unknown,
   alternativa: string
 ): string {
 
-  if (erro instanceof Error) {
+  if (
+    erro instanceof Error
+  ) {
 
     const semPrefixo =
       erro.message
@@ -35,14 +40,21 @@ function mensagemDoErro(
         )
         .trim()
 
-    if (semPrefixo !== '') {
+
+    if (
+      semPrefixo !== ''
+    ) {
+
       return semPrefixo
     }
   }
 
+
   return alternativa
 }
 
+
+// INICIAR SISTEMA
 
 async function iniciarSistema() {
 
@@ -74,15 +86,14 @@ async function iniciarSistema() {
       error
     )
 
+
     console.error(
       mensagemDoErro(
         error,
         'Não foi possível iniciar o sistema.'
       )
     )
-
   }
-
 }
 
 
