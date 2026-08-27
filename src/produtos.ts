@@ -16,9 +16,13 @@ import {
   tituloFormProduto,
   btnSalvarProduto,
   btnCancelarEdicao,
-  movimentacaoProduto,
-  menuTela
+  movimentacaoProduto
 } from './interface'
+
+import {
+  navegarParaTela,
+  TELA_CADASTRO
+} from './telas'
 
 
 interface ProdutoTela {
@@ -33,7 +37,8 @@ interface ProdutoTela {
 
 let produtosCarregados: ProdutoTela[] = []
 
-let produtoEditandoId: number | null = null
+let produtoEditandoId:
+  number | null = null
 
 
 // MOSTRAR PRODUTOS
@@ -44,170 +49,185 @@ export function mostrarProdutos(
 
   tabelaProdutos.innerHTML = ''
 
-  produtos.forEach((produto) => {
 
-    const linha =
-      document.createElement('tr')
+  produtos.forEach(
+    (produto) => {
 
-
-    const colunaId =
-      document.createElement('td')
-
-    colunaId.textContent =
-      String(produto.id)
+      const linha =
+        document.createElement('tr')
 
 
-    const colunaNome =
-      document.createElement('td')
+      const colunaId =
+        document.createElement('td')
 
-    colunaNome.textContent =
-      produto.nome
-
-
-    const colunaCodigo =
-      document.createElement('td')
-
-    colunaCodigo.textContent =
-      produto.codigo_barras
+      colunaId.textContent =
+        String(produto.id)
 
 
-    const colunaPreco =
-      document.createElement('td')
+      const colunaNome =
+        document.createElement('td')
 
-    colunaPreco.textContent =
-      `R$ ${produto.preco_venda.toFixed(2)}`
-
-
-    const colunaCategoria =
-      document.createElement('td')
-
-    colunaCategoria.textContent =
-      produto.categoria
+      colunaNome.textContent =
+        produto.nome
 
 
-    const colunaEstoque =
-      document.createElement('td')
+      const colunaCodigo =
+        document.createElement('td')
 
-    colunaEstoque.textContent =
-      String(produto.estoque)
-
-
-    const colunaStatus =
-      document.createElement('td')
+      colunaCodigo.textContent =
+        produto.codigo_barras
 
 
-    if (produto.estoque <= 5) {
+      const colunaPreco =
+        document.createElement('td')
 
-      colunaStatus.textContent =
-        'Crítico'
+      colunaPreco.textContent =
+        `R$ ${produto.preco_venda.toFixed(2)}`
 
-      colunaStatus.classList.add(
-        'critico'
+
+      const colunaCategoria =
+        document.createElement('td')
+
+      colunaCategoria.textContent =
+        produto.categoria
+
+
+      const colunaEstoque =
+        document.createElement('td')
+
+      colunaEstoque.textContent =
+        String(produto.estoque)
+
+
+      const colunaStatus =
+        document.createElement('td')
+
+
+      if (
+        produto.estoque <= 5
+      ) {
+
+        colunaStatus.textContent =
+          'Crítico'
+
+        colunaStatus.classList.add(
+          'critico'
+        )
+
+      } else {
+
+        colunaStatus.textContent =
+          'Normal'
+
+        colunaStatus.classList.add(
+          'normal'
+        )
+      }
+
+
+      const colunaAcoes =
+        document.createElement('td')
+
+
+      const btnEditar =
+        document.createElement('button')
+
+      btnEditar.type =
+        'button'
+
+      btnEditar.textContent =
+        'Editar'
+
+      btnEditar.classList.add(
+        'btn-editar-produto'
       )
 
-    } else {
 
-      colunaStatus.textContent =
-        'Normal'
+      const btnExcluir =
+        document.createElement('button')
 
-      colunaStatus.classList.add(
-        'normal'
+      btnExcluir.type =
+        'button'
+
+      btnExcluir.textContent =
+        'Excluir'
+
+      btnExcluir.classList.add(
+        'btn-excluir-produto'
+      )
+
+
+      btnEditar.addEventListener(
+        'click',
+        () => {
+
+          prepararEdicaoProduto(
+            produto
+          )
+
+        }
+      )
+
+
+      btnExcluir.addEventListener(
+        'click',
+        async () => {
+
+          await excluirProduto(
+            produto.id
+          )
+
+        }
+      )
+
+
+      colunaAcoes.appendChild(
+        btnEditar
+      )
+
+      colunaAcoes.appendChild(
+        btnExcluir
+      )
+
+
+      linha.appendChild(
+        colunaId
+      )
+
+      linha.appendChild(
+        colunaNome
+      )
+
+      linha.appendChild(
+        colunaCodigo
+      )
+
+      linha.appendChild(
+        colunaPreco
+      )
+
+      linha.appendChild(
+        colunaCategoria
+      )
+
+      linha.appendChild(
+        colunaEstoque
+      )
+
+      linha.appendChild(
+        colunaStatus
+      )
+
+      linha.appendChild(
+        colunaAcoes
+      )
+
+
+      tabelaProdutos.appendChild(
+        linha
       )
     }
-
-
-    const colunaAcoes =
-      document.createElement('td')
-
-
-    const btnEditar =
-      document.createElement('button')
-
-    btnEditar.type = 'button'
-
-    btnEditar.textContent =
-      'Editar'
-
-    btnEditar.classList.add(
-      'btn-editar-produto'
-    )
-
-
-    const btnExcluir =
-      document.createElement('button')
-
-    btnExcluir.type = 'button'
-
-    btnExcluir.textContent =
-      'Excluir'
-
-    btnExcluir.classList.add(
-      'btn-excluir-produto'
-    )
-
-
-    btnEditar.addEventListener(
-      'click',
-      () => {
-        prepararEdicaoProduto(produto)
-      }
-    )
-
-
-    btnExcluir.addEventListener(
-      'click',
-      async () => {
-        await excluirProduto(produto.id)
-      }
-    )
-
-
-    colunaAcoes.appendChild(
-      btnEditar
-    )
-
-    colunaAcoes.appendChild(
-      btnExcluir
-    )
-
-
-    linha.appendChild(
-      colunaId
-    )
-
-    linha.appendChild(
-      colunaNome
-    )
-
-    linha.appendChild(
-      colunaCodigo
-    )
-
-    linha.appendChild(
-      colunaPreco
-    )
-
-    linha.appendChild(
-      colunaCategoria
-    )
-
-    linha.appendChild(
-      colunaEstoque
-    )
-
-    linha.appendChild(
-      colunaStatus
-    )
-
-    linha.appendChild(
-      colunaAcoes
-    )
-
-
-    tabelaProdutos.appendChild(
-      linha
-    )
-  })
+  )
 }
 
 
@@ -230,7 +250,9 @@ export async function carregarProdutos() {
     )
 
 
-    if (produtos.length === 0) {
+    if (
+      produtos.length === 0
+    ) {
 
       resposta.textContent =
         'Nenhum produto cadastrado.'
@@ -270,9 +292,11 @@ formBusca.addEventListener(
     event.preventDefault()
 
 
-    erroBusca.textContent = ''
+    erroBusca.textContent =
+      ''
 
-    resposta.textContent = ''
+    resposta.textContent =
+      ''
 
 
     const termo =
@@ -296,9 +320,12 @@ formBusca.addEventListener(
         )
 
 
-      if (produtos.length === 0) {
+      if (
+        produtos.length === 0
+      ) {
 
-        produtosCarregados = []
+        produtosCarregados =
+          []
 
         mostrarProdutos([])
 
@@ -329,7 +356,9 @@ formBusca.addEventListener(
       )
 
 
-      if (error instanceof Error) {
+      if (
+        error instanceof Error
+      ) {
 
         erroBusca.textContent =
           error.message
@@ -395,7 +424,9 @@ campoBusca.addEventListener(
     )
 
 
-    if (produtosFiltrados.length === 0) {
+    if (
+      produtosFiltrados.length === 0
+    ) {
 
       resposta.textContent =
         'Nenhum produto encontrado no filtro local.'
@@ -415,9 +446,11 @@ btnLimpar.addEventListener(
   'click',
   () => {
 
-    campoBusca.value = ''
+    campoBusca.value =
+      ''
 
-    erroBusca.textContent = ''
+    erroBusca.textContent =
+      ''
 
 
     mostrarProdutos(
@@ -437,9 +470,11 @@ btnProdutos.addEventListener(
   'click',
   async () => {
 
-    erroBusca.textContent = ''
+    erroBusca.textContent =
+      ''
 
-    campoBusca.value = ''
+    campoBusca.value =
+      ''
 
     await carregarProdutos()
   }
@@ -467,7 +502,9 @@ btnCriticos.addEventListener(
       )
 
 
-      if (produtos.length === 0) {
+      if (
+        produtos.length === 0
+      ) {
 
         resposta.textContent =
           'Nenhum produto com estoque crítico.'
@@ -613,7 +650,9 @@ formProduto.addEventListener(
       )
 
 
-      if (error instanceof Error) {
+      if (
+        error instanceof Error
+      ) {
 
         respostaProduto.textContent =
           error.message
@@ -647,10 +686,10 @@ async function prepararEdicaoProduto(
 
 
   produtoPreco.value =
-    String(produto.preco_venda)
+    String(
+      produto.preco_venda
+    )
 
-
-  // Carrega as categorias
 
   try {
 
@@ -658,13 +697,16 @@ async function prepararEdicaoProduto(
       await window.api.listarCategorias()
 
 
-    produtoCategoria.innerHTML = ''
+    produtoCategoria.innerHTML =
+      ''
 
 
     const opcaoInicial =
       document.createElement('option')
 
-    opcaoInicial.value = ''
+
+    opcaoInicial.value =
+      ''
 
     opcaoInicial.textContent =
       'Selecione uma categoria'
@@ -683,7 +725,9 @@ async function prepararEdicaoProduto(
 
 
         opcao.value =
-          String(categoria.id)
+          String(
+            categoria.id
+          )
 
 
         opcao.textContent =
@@ -695,7 +739,8 @@ async function prepararEdicaoProduto(
           produto.categoria
         ) {
 
-          opcao.selected = true
+          opcao.selected =
+            true
         }
 
 
@@ -732,12 +777,8 @@ async function prepararEdicaoProduto(
 
   // Vai para a tela de cadastro
 
-  menuTela.value =
-    'cadastro'
-
-
-  menuTela.dispatchEvent(
-    new Event('change')
+  navegarParaTela(
+    TELA_CADASTRO
   )
 }
 
@@ -822,7 +863,9 @@ async function excluirProduto(
     )
 
 
-    if (error instanceof Error) {
+    if (
+      error instanceof Error
+    ) {
 
       resposta.textContent =
         error.message
@@ -835,7 +878,6 @@ async function excluirProduto(
   }
 }
 
-
 // CATEGORIAS NO CADASTRO
 
 export async function carregarCategoriasNoProduto() {
@@ -845,14 +887,14 @@ export async function carregarCategoriasNoProduto() {
     const categorias =
       await window.api.listarCategorias()
 
-
-    produtoCategoria.innerHTML = ''
-
-
+    produtoCategoria.innerHTML =
+      ''
     const opcaoInicial =
       document.createElement('option')
 
-    opcaoInicial.value = ''
+
+    opcaoInicial.value =
+      ''
 
     opcaoInicial.textContent =
       'Selecione uma categoria'
@@ -862,7 +904,6 @@ export async function carregarCategoriasNoProduto() {
       opcaoInicial
     )
 
-
     categorias.forEach(
       (categoria) => {
 
@@ -871,8 +912,9 @@ export async function carregarCategoriasNoProduto() {
 
 
         opcao.value =
-          String(categoria.id)
-
+          String(
+            categoria.id
+          )
 
         opcao.textContent =
           categoria.nome
@@ -893,7 +935,6 @@ export async function carregarCategoriasNoProduto() {
   }
 }
 
-
 // PRODUTOS NA MOVIMENTAÇÃO
 
 export async function carregarProdutosMovimentacao() {
@@ -907,11 +948,11 @@ export async function carregarProdutosMovimentacao() {
     movimentacaoProduto.innerHTML =
       ''
 
-
     const opcaoInicial =
       document.createElement('option')
 
-    opcaoInicial.value = ''
+    opcaoInicial.value =
+      ''
 
     opcaoInicial.textContent =
       'Selecione um produto'
@@ -921,7 +962,6 @@ export async function carregarProdutosMovimentacao() {
       opcaoInicial
     )
 
-
     produtos.forEach(
       (produto) => {
 
@@ -930,12 +970,12 @@ export async function carregarProdutosMovimentacao() {
 
 
         opcao.value =
-          String(produto.id)
-
+          String(
+            produto.id
+          )
 
         opcao.textContent =
           `${produto.nome} - Estoque: ${produto.estoque}`
-
 
         movimentacaoProduto.appendChild(
           opcao
