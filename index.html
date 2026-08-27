@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="pt-BR">
+
   <head>
+
     <meta charset="UTF-8" />
 
     <meta
@@ -21,7 +23,9 @@
     <title>
       Gerenciador de Estoque Comercial
     </title>
+
   </head>
+
 
   <body>
 
@@ -42,27 +46,54 @@
       </header>
 
 
-      <!-- MENU -->
+      <!-- NAVEGAÇÃO -->
 
-      <select id="menu-tela">
+      <nav class="navegacao">
 
-        <option value="produtos">
-          Produtos
-        </option>
+        <button
+          id="btn-voltar"
+          type="button"
+        >
+          ← Voltar
+        </button>
 
-        <option value="cadastro">
-          Cadastro
-        </option>
 
-        <option value="categorias">
-          Categorias
-        </option>
+        <div class="navegacao-telas">
 
-        <option value="movimentacoes">
-          Movimentações
-        </option>
+          <button
+            id="nav-produtos"
+            type="button"
+          >
+            Produtos
+          </button>
 
-      </select>
+
+          <button
+            id="nav-cadastro"
+            type="button"
+          >
+            Cadastro
+          </button>
+
+
+          <button
+            id="nav-categorias"
+            type="button"
+          >
+            Categorias
+          </button>
+
+
+          <button
+            id="nav-movimentacoes"
+            type="button"
+          >
+            Movimentações
+          </button>
+
+        </div>
+
+      </nav>
 
 
       <!-- TELA PRODUTOS -->
@@ -73,12 +104,14 @@
           Produtos
         </h2>
 
+
         <button
           id="btn-produtos"
           type="button"
         >
           Listar Produtos
         </button>
+
 
         <button
           id="btn-criticos"
@@ -94,11 +127,13 @@
             Buscar produto
           </label>
 
+
           <input
             id="campo-busca"
             type="text"
             placeholder="ID, nome ou código"
           />
+
 
           <button
             id="btn-buscar"
@@ -106,6 +141,7 @@
           >
             Buscar
           </button>
+
 
           <button
             id="btn-limpar"
@@ -141,7 +177,10 @@
 
           </thead>
 
-          <tbody id="tabela-produtos"></tbody>
+
+          <tbody
+            id="tabela-produtos"
+          ></tbody>
 
         </table>
 
@@ -166,12 +205,14 @@
             required
           />
 
+
           <input
             id="produto-codigo"
             type="text"
             placeholder="Código de barras"
             required
           />
+
 
           <input
             id="produto-preco"
@@ -181,6 +222,7 @@
             placeholder="Preço de venda"
             required
           />
+
 
           <select
             id="produto-categoria"
@@ -229,6 +271,7 @@
             required
           />
 
+
           <input
             id="categoria-descricao"
             type="text"
@@ -236,7 +279,10 @@
             required
           />
 
-          <button type="submit">
+
+          <button
+            type="submit"
+          >
             Cadastrar Categoria
           </button>
 
@@ -273,7 +319,9 @@
           </thead>
 
 
-          <tbody id="tabela-categorias"></tbody>
+          <tbody
+            id="tabela-categorias"
+          ></tbody>
 
         </table>
 
@@ -321,9 +369,11 @@
               Selecione o tipo
             </option>
 
+
             <option value="entrada">
               Entrada
             </option>
+
 
             <option value="saida">
               Saída
@@ -332,7 +382,9 @@
           </select>
 
 
-          <button type="submit">
+          <button
+            type="submit"
+          >
             Registrar Movimentação
           </button>
 
@@ -352,4 +404,5 @@
     ></script>
 
   </body>
+
 </html>
