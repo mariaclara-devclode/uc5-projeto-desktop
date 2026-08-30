@@ -1,5 +1,5 @@
 {
-  "name": "gerenciador-estoque-comercial",
+  "name": "estok",
   "version": "1.0.0",
   "main": "dist-electron/main.js",
   "description": "Projeto base Electron + Vite + TypeScript com IPC seguro e empacotamento por usuário",
@@ -23,12 +23,24 @@
     "vite-plugin-electron-renderer": "^1.0.0"
   },
   "build": {
-    "appId":"br.com.mariaclara.gerenciadorestoquecomercial",
-    "productName": "Gerenciador de Estoque Comercial",
+    "appId":"br.com.mariaclara.estok",
+    "productName": "Estok",
 
     "directories": {
       "output": "release"
     },
+
+    "files": [
+      "**/*",
+      "!**/.env*"
+    ],
+
+     "extraResources": [
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
 
     "win": {
       "target": "nsis",
