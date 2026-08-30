@@ -3,36 +3,43 @@ import {
   ipcRenderer,
 } from 'electron'
 
+import { CANAIS } from './canais'
+
+
 contextBridge.exposeInMainWorld(
   'api',
   {
+
     // PING
-    // 
 
     ping: () =>
       ipcRenderer.invoke(
-        'canal-ping'
+        CANAIS.ping
       ),
 
+
     // PRODUTOS
-    // 
+
     listarProdutos: () =>
       ipcRenderer.invoke(
-        'listar-produtos'
+        CANAIS.listarProdutos
       ),
+
 
     buscarProdutos: (
       termo: string
     ) =>
       ipcRenderer.invoke(
-        'buscar-produtos',
+        CANAIS.buscarProdutos,
         termo
       ),
 
+
     listarEstoqueCritico: () =>
       ipcRenderer.invoke(
-        'listar-estoque-critico'
+        CANAIS.listarEstoqueCritico
       ),
+
 
     cadastrarProduto: (
       nome: string,
@@ -41,7 +48,7 @@ contextBridge.exposeInMainWorld(
       id_categoria: number
     ) =>
       ipcRenderer.invoke(
-        'cadastrar-produto',
+        CANAIS.cadastrarProduto,
         {
           nome,
           codigo_barras,
@@ -49,6 +56,7 @@ contextBridge.exposeInMainWorld(
           id_categoria,
         }
       ),
+
 
     editarProduto: (
       id: number,
@@ -58,7 +66,7 @@ contextBridge.exposeInMainWorld(
       id_categoria: number
     ) =>
       ipcRenderer.invoke(
-        'editar-produto',
+        CANAIS.editarProduto,
         {
           id,
           nome,
@@ -68,33 +76,36 @@ contextBridge.exposeInMainWorld(
         }
       ),
 
+
     excluirProduto: (
       id: number
     ) =>
       ipcRenderer.invoke(
-        'excluir-produto',
+        CANAIS.excluirProduto,
         id
       ),
 
+
     // CATEGORIAS
-    // 
 
     listarCategorias: () =>
       ipcRenderer.invoke(
-        'listar-categorias'
+        CANAIS.listarCategorias
       ),
+
 
     cadastrarCategoria: (
       nome: string,
       descricao: string
     ) =>
       ipcRenderer.invoke(
-        'cadastrar-categoria',
+        CANAIS.cadastrarCategoria,
         {
           nome,
           descricao,
         }
       ),
+
 
     editarCategoria: (
       id: number,
@@ -102,7 +113,7 @@ contextBridge.exposeInMainWorld(
       descricao: string
     ) =>
       ipcRenderer.invoke(
-        'editar-categoria',
+        CANAIS.editarCategoria,
         {
           id,
           nome,
@@ -110,16 +121,18 @@ contextBridge.exposeInMainWorld(
         }
       ),
 
+
     excluirCategoria: (
       id: number
     ) =>
       ipcRenderer.invoke(
-        'excluir-categoria',
+        CANAIS.excluirCategoria,
         id
       ),
 
+
     // MOVIMENTAÇÕES
-    // 
+
     registrarMovimentacao: (
       id_produto: number,
       quantidade: number,
@@ -128,12 +141,13 @@ contextBridge.exposeInMainWorld(
         | 'saida'
     ) =>
       ipcRenderer.invoke(
-        'registrar-movimentacao',
+        CANAIS.registrarMovimentacao,
         {
           id_produto,
           quantidade,
           tipo,
         }
       ),
+
   }
 )
