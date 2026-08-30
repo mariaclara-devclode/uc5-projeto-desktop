@@ -1,39 +1,25 @@
 export const CANAIS = {
+  ping: "canal-ping",
 
-  ping:
-    "canal-ping",
+  listarProdutos: "listar-produtos",
 
-  listarProdutos:
-    "listar-produtos",
+  buscarProdutos: "buscar-produtos",
 
-  buscarProdutos:
-    "buscar-produtos",
+  listarEstoqueCritico: "listar-estoque-critico",
 
-  listarEstoqueCritico:
-    "listar-estoque-critico",
+  cadastrarProduto: "cadastrar-produto",
 
-  cadastrarProduto:
-    "cadastrar-produto",
+  editarProduto: "editar-produto",
 
-  editarProduto:
-    "editar-produto",
+  excluirProduto: "excluir-produto",
 
-  excluirProduto:
-    "excluir-produto",
+  listarCategorias: "listar-categorias",
 
-  listarCategorias:
-    "listar-categorias",
+  cadastrarCategoria: "cadastrar-categoria",
 
-  cadastrarCategoria:
-    "cadastrar-categoria",
+  editarCategoria: "editar-categoria",
 
-  editarCategoria:
-    "editar-categoria",
+  excluirCategoria: "excluir-categoria",
 
-  excluirCategoria:
-    "excluir-categoria",
-
-  registrarMovimentacao:
-    "registrar-movimentacao",
-
+  registrarMovimentacao: "registrar-movimentacao",
 } as const;
