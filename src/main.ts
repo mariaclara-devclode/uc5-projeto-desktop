@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 
 import path from "path";
 
-import { comTratamento, registrarErro } from "./erros";
+import { comTratamento, registrarErro, mensagemAmigavel } from "./erros";
 
 import { CANAIS } from "./canais";
 
@@ -78,14 +78,14 @@ function createWindow() {
 function createMenu() {
   const menu = Menu.buildFromTemplate([
     {
-      label: "Gerenciador de Estoque Comercial",
+      label: "Estok",
 
       submenu: [
         {
           label: "Sobre",
 
           click: () => {
-            console.log("Gerenciador de Estoque Comercial");
+            console.log("Estok");
           },
         },
 
@@ -177,11 +177,8 @@ ipcMain.handle(
 
     dados: {
       nome: string;
-
       codigo_barras: string;
-
       preco_venda: number;
-
       id_categoria: number;
     },
   ) =>
@@ -200,13 +197,9 @@ ipcMain.handle(
 
     dados: {
       id: number;
-
       nome: string;
-
       codigo_barras: string;
-
       preco_venda: number;
-
       id_categoria: number;
     },
   ) =>
@@ -249,7 +242,6 @@ ipcMain.handle(
 
     dados: {
       nome: string;
-
       descricao: string;
     },
   ) =>
@@ -268,9 +260,7 @@ ipcMain.handle(
 
     dados: {
       id: number;
-
       nome: string;
-
       descricao: string;
     },
   ) =>
@@ -302,9 +292,7 @@ ipcMain.handle(
 
     dados: {
       id_produto: number;
-
       quantidade: number;
-
       tipo: "entrada" | "saida";
     },
   ) =>
@@ -318,27 +306,42 @@ ipcMain.handle(
 // INICIALIZAÇÃO
 
 app.whenReady().then(async () => {
-  // Primeiro cria a janela.
-  // Assim, um problema de configuração
-  // não acontece antes da interface existir.
+  // Cria primeiro a janela.
 
   createWindow();
 
-  // Cria o menu da aplicação.
+  // Cria o menu.
 
   createMenu();
 
-  // VERIFICAÇÃO DA CONFIGURAÇÃO
+  // Verifica configuração.
 
   if (!configuracaoOk) {
-    const erro = new Error("DATABASE_URL não foi encontrada no arquivo .env");
+    const mensagem =
+      "Não foi possível carregar a configuração do banco de dados.\n\n" +
+      "Verifique o arquivo .env e tente novamente.";
 
-    console.error(erro.message);
+    console.error("DATABASE_URL não foi encontrada no arquivo .env");
 
-    registrarErro("inicializacao", erro);
+    registrarErro(
+      "inicializacao",
+      new Error("DATABASE_URL não foi encontrada no arquivo .env"),
+    );
+
+    await dialog.showMessageBox(mainWindow!, {
+      type: "error",
+
+      title: "Erro de configuração",
+
+      message: "Configuração do banco não encontrada",
+
+      detail: mensagem,
+
+      buttons: ["OK"],
+    });
   }
 
-  // VERIFICAÇÃO DA CONEXÃO
+  // Verifica conexão.
   else {
     try {
       await verificarConexaoBanco();
@@ -348,6 +351,18 @@ app.whenReady().then(async () => {
       console.error("Erro ao conectar ao banco:", error);
 
       registrarErro("inicializacao", error);
+
+      await dialog.showMessageBox(mainWindow!, {
+        type: "error",
+
+        title: "Erro de conexão",
+
+        message: "Não foi possível conectar ao banco de dados.",
+
+        detail: mensagemAmigavel(error),
+
+        buttons: ["OK"],
+      });
     }
   }
 
