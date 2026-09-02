@@ -1,12 +1,4 @@
 import {
-  btnProdutos,
-  btnCriticos,
-  formBusca,
-  campoBusca,
-  btnLimpar,
-  erroBusca,
-  resposta,
-  tabelaProdutos,
   formProduto,
   produtoNome,
   produtoCodigo,
@@ -16,6 +8,14 @@ import {
   tituloFormProduto,
   btnSalvarProduto,
   btnCancelarEdicao,
+  btnProdutos,
+  btnCriticos,
+  formBusca,
+  campoBusca,
+  btnLimpar,
+  erroBusca,
+  resposta,
+  tabelaProdutos,
   movimentacaoProduto,
 } from "./interface";
 
@@ -28,46 +28,79 @@ interface ProdutoTela {
   preco_venda: number;
   categoria: string;
   estoque: number;
+  ativo: boolean;
 }
 
 let produtosCarregados: ProdutoTela[] = [];
 
 let produtoEditandoId: number | null = null;
 
+// MOSTRAR ERRO
+
+function mostrarErro(erro: unknown, mensagemPadrao: string) {
+  if (erro instanceof Error) {
+    return erro.message;
+  }
+
+  return mensagemPadrao;
+}
+
 // MOSTRAR PRODUTOS
-export function mostrarProdutos(produtos: ProdutoTela[]) {
+
+function mostrarProdutos(produtos: ProdutoTela[]) {
   tabelaProdutos.innerHTML = "";
 
   produtos.forEach((produto) => {
     const linha = document.createElement("tr");
 
+    // ID
+
     const colunaId = document.createElement("td");
 
     colunaId.textContent = String(produto.id);
+
+    // NOME
 
     const colunaNome = document.createElement("td");
 
     colunaNome.textContent = produto.nome;
 
+    // CÓDIGO
+
     const colunaCodigo = document.createElement("td");
 
     colunaCodigo.textContent = produto.codigo_barras;
 
+    // PREÇO
+
     const colunaPreco = document.createElement("td");
 
-    colunaPreco.textContent = `R$ ${produto.preco_venda.toFixed(2)}`;
+    colunaPreco.textContent = produto.preco_venda.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+    // CATEGORIA
 
     const colunaCategoria = document.createElement("td");
 
     colunaCategoria.textContent = produto.categoria;
 
+    // ESTOQUE
+
     const colunaEstoque = document.createElement("td");
 
     colunaEstoque.textContent = String(produto.estoque);
 
+    // STATUS
+
     const colunaStatus = document.createElement("td");
 
-    if (produto.estoque <= 5) {
+    if (!produto.ativo) {
+      colunaStatus.textContent = "Inativo";
+
+      colunaStatus.classList.add("inativo");
+    } else if (produto.estoque <= 10) {
       colunaStatus.textContent = "Crítico";
 
       colunaStatus.classList.add("critico");
@@ -77,57 +110,61 @@ export function mostrarProdutos(produtos: ProdutoTela[]) {
       colunaStatus.classList.add("normal");
     }
 
+    // AÇÕES
+
     const colunaAcoes = document.createElement("td");
 
-    const btnEditar = document.createElement("button");
+    if (produto.ativo) {
+      const botaoEditar = document.createElement("button");
 
-    btnEditar.type = "button";
+      botaoEditar.type = "button";
 
-    btnEditar.textContent = "Editar";
+      botaoEditar.textContent = "Editar";
 
-    btnEditar.classList.add("btn-editar-produto");
+      botaoEditar.classList.add("btn-editar-produto");
 
-    const btnExcluir = document.createElement("button");
+      botaoEditar.addEventListener("click", () => {
+        prepararEdicaoProduto(produto);
+      });
 
-    btnExcluir.type = "button";
+      const botaoExcluir = document.createElement("button");
 
-    btnExcluir.textContent = "Excluir";
+      botaoExcluir.type = "button";
 
-    btnExcluir.classList.add("btn-excluir-produto");
+      botaoExcluir.textContent = "Excluir";
 
-    btnEditar.addEventListener("click", () => {
-      prepararEdicaoProduto(produto);
-    });
+      botaoExcluir.classList.add("btn-excluir-produto");
 
-    btnExcluir.addEventListener("click", async () => {
-      await excluirProduto(produto.id);
-    });
+      botaoExcluir.addEventListener("click", () => {
+        excluirProduto(produto);
+      });
 
-    colunaAcoes.appendChild(btnEditar);
+      colunaAcoes.append(botaoEditar, botaoExcluir);
+    } else {
+      const texto = document.createElement("span");
 
-    colunaAcoes.appendChild(btnExcluir);
+      texto.textContent = "Produto inativo";
 
-    linha.appendChild(colunaId);
+      colunaAcoes.append(texto);
+    }
 
-    linha.appendChild(colunaNome);
-
-    linha.appendChild(colunaCodigo);
-
-    linha.appendChild(colunaPreco);
-
-    linha.appendChild(colunaCategoria);
-
-    linha.appendChild(colunaEstoque);
-
-    linha.appendChild(colunaStatus);
-
-    linha.appendChild(colunaAcoes);
+    linha.append(
+      colunaId,
+      colunaNome,
+      colunaCodigo,
+      colunaPreco,
+      colunaCategoria,
+      colunaEstoque,
+      colunaStatus,
+      colunaAcoes,
+    );
 
     tabelaProdutos.appendChild(linha);
   });
 }
 
-// LISTAR PRODUTOS
+// CARREGAR PRODUTOS
+
 export async function carregarProdutos() {
   try {
     const produtos = await window.api.listarProdutos();
@@ -136,34 +173,28 @@ export async function carregarProdutos() {
 
     mostrarProdutos(produtosCarregados);
 
-    if (produtos.length === 0) {
-      resposta.textContent = "Nenhum produto cadastrado.";
-    } else {
-      resposta.textContent = `${produtos.length} produto(s) encontrado(s).`;
-    }
+    resposta.textContent = `${produtos.length} produto(s) encontrado(s).`;
+  } catch (erro) {
+    console.error("Erro ao carregar produtos:", erro);
 
-    return produtos;
-  } catch (error) {
-    console.error("Erro ao carregar produtos:", error);
-
-    resposta.textContent = "Não foi possível carregar os produtos.";
-
-    return [];
+    resposta.textContent = mostrarErro(
+      erro,
+      "Não foi possível carregar os produtos.",
+    );
   }
 }
 
-// BUSCAR NO MAIN
-formBusca.addEventListener("submit", async (event) => {
-  event.preventDefault();
+// BUSCAR PRODUTOS
 
+async function buscarProdutos() {
   erroBusca.textContent = "";
-
-  resposta.textContent = "";
 
   const termo = campoBusca.value.trim();
 
   if (!termo) {
-    erroBusca.textContent = "Digite um ID, nome ou código para buscar.";
+    erroBusca.textContent = "Digite um ID, nome ou código de barras.";
+
+    campoBusca.focus();
 
     return;
   }
@@ -171,143 +202,106 @@ formBusca.addEventListener("submit", async (event) => {
   try {
     const produtos = await window.api.buscarProdutos(termo);
 
-    if (produtos.length === 0) {
-      produtosCarregados = [];
-
-      mostrarProdutos([]);
-
-      resposta.textContent = "Nenhum produto encontrado.";
-
-      return;
-    }
-
     produtosCarregados = produtos;
 
-    mostrarProdutos(produtos);
-
-    resposta.textContent = `${produtos.length} produto(s) encontrado(s).`;
-  } catch (error) {
-    console.error("Erro ao buscar produto:", error);
-
-    if (error instanceof Error) {
-      erroBusca.textContent = error.message;
-    } else {
-      erroBusca.textContent = "O Main recusou a busca.";
-    }
-  }
-});
-
-// FILTRO LOCAL
-campoBusca.addEventListener("input", () => {
-  const termo = campoBusca.value.trim().toLowerCase();
-
-  if (!termo) {
     mostrarProdutos(produtosCarregados);
 
-    resposta.textContent = `${produtosCarregados.length} produto(s) carregado(s).`;
+    resposta.textContent = `${produtos.length} produto(s) encontrado(s).`;
+  } catch (erro) {
+    console.error("Erro ao buscar produtos:", erro);
 
-    return;
-  }
-
-  const produtosFiltrados = produtosCarregados.filter((produto) => {
-    return (
-      String(produto.id).includes(termo) ||
-      produto.nome.toLowerCase().includes(termo) ||
-      produto.codigo_barras.toLowerCase().includes(termo)
+    erroBusca.textContent = mostrarErro(
+      erro,
+      "Não foi possível realizar a busca.",
     );
-  });
-
-  mostrarProdutos(produtosFiltrados);
-
-  if (produtosFiltrados.length === 0) {
-    resposta.textContent = "Nenhum produto encontrado no filtro local.";
-  } else {
-    resposta.textContent = `${produtosFiltrados.length} produto(s) encontrado(s) no filtro local.`;
   }
-});
+}
 
 // LIMPAR BUSCA
-btnLimpar.addEventListener("click", () => {
+
+function limparBusca() {
   campoBusca.value = "";
 
   erroBusca.textContent = "";
 
-  mostrarProdutos(produtosCarregados);
-
-  resposta.textContent = `${produtosCarregados.length} produto(s) carregado(s).`;
-});
-
-// BOTÃO LISTAR
-btnProdutos.addEventListener("click", async () => {
-  erroBusca.textContent = "";
-
-  campoBusca.value = "";
-
-  await carregarProdutos();
-});
+  carregarProdutos();
+}
 
 // ESTOQUE CRÍTICO
-btnCriticos.addEventListener("click", async () => {
+
+async function listarEstoqueCritico() {
+  erroBusca.textContent = "";
+
   try {
     const produtos = await window.api.listarEstoqueCritico();
 
     produtosCarregados = produtos;
 
-    mostrarProdutos(produtos);
+    mostrarProdutos(produtosCarregados);
 
-    if (produtos.length === 0) {
-      resposta.textContent = "Nenhum produto com estoque crítico.";
-    } else {
-      resposta.textContent = `${produtos.length} produto(s) com estoque crítico.`;
-    }
-  } catch (error) {
-    console.error("Erro ao consultar estoque crítico:", error);
+    resposta.textContent = `${produtos.length} produto(s) em estoque crítico.`;
+  } catch (erro) {
+    console.error("Erro ao listar estoque crítico:", erro);
 
-    resposta.textContent = "Não foi possível consultar o estoque crítico.";
+    resposta.textContent = mostrarErro(
+      erro,
+      "Não foi possível listar o estoque crítico.",
+    );
   }
-});
+}
 
-// CADASTRAR OU EDITAR
-formProduto.addEventListener("submit", async (event) => {
-  event.preventDefault();
+// CADASTRAR / EDITAR PRODUTO
+
+formProduto.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  respostaProduto.textContent = "";
+
+  const nome = produtoNome.value.trim();
+
+  const codigo = produtoCodigo.value.trim();
+
+  const preco = Number(produtoPreco.value);
+
+  const idCategoria = Number(produtoCategoria.value);
+
+  if (!nome) {
+    respostaProduto.textContent = "Informe o nome do produto.";
+
+    produtoNome.focus();
+
+    return;
+  }
+
+  if (!codigo) {
+    respostaProduto.textContent = "Informe o código de barras.";
+
+    produtoCodigo.focus();
+
+    return;
+  }
+
+  if (!Number.isFinite(preco) || preco < 0) {
+    respostaProduto.textContent = "Informe um preço válido.";
+
+    produtoPreco.focus();
+
+    return;
+  }
+
+  if (!Number.isInteger(idCategoria) || idCategoria <= 0) {
+    respostaProduto.textContent = "Selecione uma categoria.";
+
+    produtoCategoria.focus();
+
+    return;
+  }
 
   try {
-    const nome = produtoNome.value.trim();
-
-    const codigo = produtoCodigo.value.trim();
-
-    const preco = Number(produtoPreco.value);
-
-    const idCategoria = Number(produtoCategoria.value);
-
-    if (!nome) {
-      respostaProduto.textContent = "Informe o nome do produto.";
-
-      return;
-    }
-
-    if (!codigo) {
-      respostaProduto.textContent = "Informe o código de barras.";
-
-      return;
-    }
-
-    if (!Number.isFinite(preco) || preco < 0) {
-      respostaProduto.textContent = "Informe um preço válido.";
-
-      return;
-    }
-
-    if (!Number.isInteger(idCategoria) || idCategoria <= 0) {
-      respostaProduto.textContent = "Selecione uma categoria.";
-
-      return;
-    }
-
     if (produtoEditandoId === null) {
       await window.api.cadastrarProduto(nome, codigo, preco, idCategoria);
 
-      respostaProduto.textContent = "Produto cadastrado com sucesso!";
+      respostaProduto.textContent = "Produto cadastrado com sucesso.";
     } else {
       await window.api.editarProduto(
         produtoEditandoId,
@@ -317,27 +311,45 @@ formProduto.addEventListener("submit", async (event) => {
         idCategoria,
       );
 
-      respostaProduto.textContent = "Produto atualizado com sucesso!";
+      respostaProduto.textContent = "Produto atualizado com sucesso.";
     }
 
-    limparFormularioProduto();
+    formProduto.reset();
+
+    produtoEditandoId = null;
+
+    tituloFormProduto.textContent = "Cadastrar Produto";
+
+    btnSalvarProduto.textContent = "Cadastrar Produto";
+
+    btnCancelarEdicao.style.display = "none";
 
     await carregarProdutos();
 
-    await carregarProdutosMovimentacao();
-  } catch (error) {
-    console.error("Erro ao salvar produto:", error);
+    await carregarCategoriasNoProduto();
 
-    if (error instanceof Error) {
-      respostaProduto.textContent = error.message;
-    } else {
-      respostaProduto.textContent = "Não foi possível salvar o produto.";
-    }
+    await carregarProdutosMovimentacao();
+  } catch (erro) {
+    console.error("Erro ao salvar produto:", erro);
+
+    respostaProduto.textContent = mostrarErro(
+      erro,
+      "Não foi possível salvar o produto.",
+    );
   }
 });
 
 // PREPARAR EDIÇÃO
+
 async function prepararEdicaoProduto(produto: ProdutoTela) {
+  if (!produto.ativo) {
+    resposta.textContent = "Este produto está inativo e não pode ser editado.";
+
+    return;
+  }
+
+  await carregarCategoriasNoProduto();
+
   produtoEditandoId = produto.id;
 
   produtoNome.value = produto.nome;
@@ -346,34 +358,12 @@ async function prepararEdicaoProduto(produto: ProdutoTela) {
 
   produtoPreco.value = String(produto.preco_venda);
 
-  try {
-    const categorias = await window.api.listarCategorias();
+  const categoria = Array.from(produtoCategoria.options).find(
+    (opcao) => opcao.textContent === produto.categoria,
+  );
 
-    produtoCategoria.innerHTML = "";
-
-    const opcaoInicial = document.createElement("option");
-
-    opcaoInicial.value = "";
-
-    opcaoInicial.textContent = "Selecione uma categoria";
-
-    produtoCategoria.appendChild(opcaoInicial);
-
-    categorias.forEach((categoria) => {
-      const opcao = document.createElement("option");
-
-      opcao.value = String(categoria.id);
-
-      opcao.textContent = categoria.nome;
-
-      if (categoria.nome === produto.categoria) {
-        opcao.selected = true;
-      }
-
-      produtoCategoria.appendChild(opcao);
-    });
-  } catch (error) {
-    console.error("Erro ao carregar categoria:", error);
+  if (categoria) {
+    produtoCategoria.value = categoria.value;
   }
 
   tituloFormProduto.textContent = "Editar Produto";
@@ -382,21 +372,14 @@ async function prepararEdicaoProduto(produto: ProdutoTela) {
 
   btnCancelarEdicao.style.display = "inline-block";
 
-  respostaProduto.textContent = `Editando produto ID ${produto.id}.`;
+  respostaProduto.textContent = "Editando produto.";
 
-  // Vai para a tela de cadastro
   navegarParaTela(TELA_CADASTRO);
 }
 
 // CANCELAR EDIÇÃO
-btnCancelarEdicao.addEventListener("click", () => {
-  limparFormularioProduto();
 
-  respostaProduto.textContent = "Edição cancelada.";
-});
-
-// LIMPAR FORMULÁRIO
-function limparFormularioProduto() {
+function cancelarEdicaoProduto() {
   produtoEditandoId = null;
 
   formProduto.reset();
@@ -406,48 +389,61 @@ function limparFormularioProduto() {
   btnSalvarProduto.textContent = "Cadastrar Produto";
 
   btnCancelarEdicao.style.display = "none";
+
+  respostaProduto.textContent = "";
 }
 
 // EXCLUIR PRODUTO
-async function excluirProduto(id: number) {
-  const confirmar = confirm(`Deseja realmente excluir o produto ID ${id}?`);
+
+async function excluirProduto(produto: ProdutoTela) {
+  if (!produto.ativo) {
+    resposta.textContent = "Este produto já está inativo.";
+
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `Deseja excluir o produto "${produto.nome}"?`,
+  );
 
   if (!confirmar) {
     return;
   }
 
   try {
-    await window.api.excluirProduto(id);
+    const resultado = await window.api.excluirProduto(produto.id);
 
-    resposta.textContent = "Produto excluído com sucesso!";
+    // ATUALIZA A LISTA SEM APAGAR
+    // O PRODUTO INATIVADO.
 
     await carregarProdutos();
 
-    await carregarProdutosMovimentacao();
-  } catch (error) {
-    console.error("Erro ao excluir produto:", error);
-
-    if (error instanceof Error) {
-      resposta.textContent = error.message;
+    if (resultado.inativado) {
+      resposta.textContent = resultado.mensagem;
     } else {
-      resposta.textContent = "Não foi possível excluir o produto.";
+      resposta.textContent = resultado.mensagem;
     }
+  } catch (erro) {
+    console.error("Erro ao excluir produto:", erro);
+
+    resposta.textContent = mostrarErro(
+      erro,
+      "Não foi possível excluir o produto.",
+    );
   }
 }
 
-// CATEGORIAS NO CADASTRO
+// CARREGAR CATEGORIAS NO SELECT
+
 export async function carregarCategoriasNoProduto() {
   try {
     const categorias = await window.api.listarCategorias();
 
-    produtoCategoria.innerHTML = "";
-    const opcaoInicial = document.createElement("option");
-
-    opcaoInicial.value = "";
-
-    opcaoInicial.textContent = "Selecione uma categoria";
-
-    produtoCategoria.appendChild(opcaoInicial);
+    produtoCategoria.innerHTML = `
+      <option value="">
+        Selecione uma categoria
+      </option>
+      `;
 
     categorias.forEach((categoria) => {
       const opcao = document.createElement("option");
@@ -458,36 +454,70 @@ export async function carregarCategoriasNoProduto() {
 
       produtoCategoria.appendChild(opcao);
     });
-  } catch (error) {
-    console.error("Erro ao carregar categorias:", error);
+  } catch (erro) {
+    console.error("Erro ao carregar categorias:", erro);
+
+    respostaProduto.textContent = mostrarErro(
+      erro,
+      "Não foi possível carregar as categorias.",
+    );
   }
 }
 
-// PRODUTOS NA MOVIMENTAÇÃO
+// CARREGAR PRODUTOS NO SELECT
+// DE MOVIMENTAÇÃO
+
 export async function carregarProdutosMovimentacao() {
   try {
     const produtos = await window.api.listarProdutos();
 
-    movimentacaoProduto.innerHTML = "";
+    movimentacaoProduto.innerHTML = `
+      <option value="">
+        Selecione um produto
+      </option>
+      `;
 
-    const opcaoInicial = document.createElement("option");
+    produtos
+      .filter((produto) => produto.ativo)
+      .forEach((produto) => {
+        const opcao = document.createElement("option");
 
-    opcaoInicial.value = "";
+        opcao.value = String(produto.id);
 
-    opcaoInicial.textContent = "Selecione um produto";
+        opcao.textContent = produto.nome;
 
-    movimentacaoProduto.appendChild(opcaoInicial);
+        movimentacaoProduto.appendChild(opcao);
+      });
+  } catch (erro) {
+    console.error("Erro ao carregar produtos para movimentação:", erro);
 
-    produtos.forEach((produto) => {
-      const opcao = document.createElement("option");
-
-      opcao.value = String(produto.id);
-
-      opcao.textContent = `${produto.nome} - Estoque: ${produto.estoque}`;
-
-      movimentacaoProduto.appendChild(opcao);
-    });
-  } catch (error) {
-    console.error("Erro ao carregar produtos para movimentação:", error);
+    resposta.textContent = mostrarErro(
+      erro,
+      "Não foi possível carregar os produtos para movimentação.",
+    );
   }
 }
+
+// EVENTOS
+
+formBusca.addEventListener("submit", (evento) => {
+  evento.preventDefault();
+
+  buscarProdutos();
+});
+
+btnLimpar.addEventListener("click", limparBusca);
+
+btnProdutos.addEventListener("click", carregarProdutos);
+
+btnCriticos.addEventListener("click", listarEstoqueCritico);
+
+btnCancelarEdicao.addEventListener("click", cancelarEdicaoProduto);
+
+// ESTADO INICIAL
+
+btnCancelarEdicao.style.display = "none";
+
+carregarProdutos();
+carregarCategoriasNoProduto();
+carregarProdutosMovimentacao();
