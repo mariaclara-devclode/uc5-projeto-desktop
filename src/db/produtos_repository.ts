@@ -35,7 +35,8 @@ export async function listarProdutos() {
 
     LEFT JOIN movimentacoes m
       ON m.id_produto = p.id
-
+    where
+      p.ativo = TRUE
     GROUP BY
       p.id,
       p.nome,
