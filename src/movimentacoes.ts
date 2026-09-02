@@ -3,86 +3,132 @@ import {
   movimentacaoProduto,
   movimentacaoQuantidade,
   movimentacaoTipo,
-  respostaMovimentacao
-} from './interface'
+  respostaMovimentacao,
+} from "./interface";
 
 import {
-  mostrarProdutos,
-  carregarProdutosMovimentacao
-} from './produtos'
+  carregarProdutos,
+  carregarProdutosMovimentacao,
+} from "./produtos";
+
+
+// MOSTRAR ERRO
+
+function mostrarErro(
+  erro: unknown,
+  mensagemPadrao: string,
+): string {
+
+  if (erro instanceof Error) {
+    return erro.message;
+  }
+
+  return mensagemPadrao;
+}
+
+
+// REGISTRAR MOVIMENTAÇÃO
 
 formMovimentacao.addEventListener(
-  'submit',
-  async (event) => {
-    event.preventDefault()
+  "submit",
+  async (evento) => {
+
+    evento.preventDefault();
+
+    respostaMovimentacao.textContent =
+      "";
+
+
+    const idProduto =
+      Number(
+        movimentacaoProduto.value,
+      );
+
+    const quantidade =
+      Number(
+        movimentacaoQuantidade.value,
+      );
+
+    const tipo =
+      movimentacaoTipo.value;
+
+
+    if (
+      !Number.isInteger(idProduto) ||
+      idProduto <= 0
+    ) {
+
+      respostaMovimentacao.textContent =
+        "Selecione um produto.";
+
+      movimentacaoProduto.focus();
+
+      return;
+    }
+
+
+    if (
+      !Number.isInteger(
+        quantidade,
+      ) ||
+      quantidade <= 0
+    ) {
+
+      respostaMovimentacao.textContent =
+        "Informe uma quantidade inteira maior que zero.";
+
+      movimentacaoQuantidade.focus();
+
+      return;
+    }
+
+
+    if (
+      tipo !== "entrada" &&
+      tipo !== "saida"
+    ) {
+
+      respostaMovimentacao.textContent =
+        "Selecione o tipo de movimentação.";
+
+      movimentacaoTipo.focus();
+
+      return;
+    }
+
 
     try {
-      const idProduto =
-        Number(
-          movimentacaoProduto.value
-        )
-
-      const quantidade =
-        Number(
-          movimentacaoQuantidade.value
-        )
-
-      const tipo =
-        movimentacaoTipo.value as
-          | 'entrada'
-          | 'saida'
-
-      if (idProduto <= 0) {
-        respostaMovimentacao.textContent =
-          'Selecione um produto.'
-
-        return
-      }
-
-      if (quantidade <= 0) {
-        respostaMovimentacao.textContent =
-          'Informe uma quantidade válida.'
-
-        return
-      }
-
-      if (
-        tipo !== 'entrada' &&
-        tipo !== 'saida'
-      ) {
-        respostaMovimentacao.textContent =
-          'Selecione entrada ou saída.'
-
-        return
-      }
 
       await window.api.registrarMovimentacao(
         idProduto,
         quantidade,
-        tipo
-      )
+        tipo,
+      );
+
 
       respostaMovimentacao.textContent =
-        'Movimentação registrada com sucesso!'
+        "Movimentação registrada com sucesso.";
 
-      formMovimentacao.reset()
 
-      const produtos =
-        await window.api.listarProdutos()
+      formMovimentacao.reset();
 
-      mostrarProdutos(produtos)
 
-      await carregarProdutosMovimentacao()
-    } catch (error) {
-      console.error(error)
+      await carregarProdutos();
 
-      if (error instanceof Error) {
-        respostaMovimentacao.textContent =
-          error.message
-      } else {
-        respostaMovimentacao.textContent =
-          'Erro ao registrar movimentação.'
-      }
+      await carregarProdutosMovimentacao();
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao registrar movimentação:",
+        erro,
+      );
+
+      respostaMovimentacao.textContent =
+        mostrarErro(
+          erro,
+          "Não foi possível registrar a movimentação.",
+        );
     }
-  }
-)
+  },
+);
