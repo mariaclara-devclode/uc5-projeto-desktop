@@ -1,5 +1,6 @@
 /* 
-   ESTOK — Gerenciador de Estoque Comercial*/
+   ESTOK — Gerenciador de Estoque Comercial
+*/
 
 :root {
   /* Superfícies */
@@ -17,7 +18,7 @@
   --text-on-dark: #f8fafc;
   --text-on-dark-muted: #93a3c2;
 
-  /* Marca (azul) */
+  /* Marca */
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-soft: rgba(37, 99, 235, 0.12);
@@ -26,7 +27,7 @@
   --danger: #dc2626;
   --danger-hover: #b91c1c;
 
-  /* Status de estoque (badges) */
+  /* Status */
   --status-ok-bg: #dcfce7;
   --status-ok-text: #16a34a;
   --status-critico-bg: #fee2e2;
@@ -206,7 +207,7 @@ button {
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  margin: 4px;
+  margin: 0;
   transition:
     background-color 0.2s,
     transform 0.1s;
@@ -220,7 +221,7 @@ button:active {
   transform: scale(0.97);
 }
 
-/* ÍCONES DENTRO DOS BOTÕES */
+/* ÍCONES */
 
 .btn-editar-produto,
 .btn-excluir-produto,
@@ -240,7 +241,7 @@ button:active {
   flex-shrink: 0;
 }
 
-/* BOTÃO EDITAR PRODUTO */
+/* EDITAR PRODUTO */
 
 .btn-editar-produto {
   background: var(--primary);
@@ -252,7 +253,7 @@ button:active {
   background: var(--primary-hover);
 }
 
-/* BOTÃO EXCLUIR PRODUTO */
+/* EXCLUIR PRODUTO */
 
 .btn-excluir-produto {
   background: var(--danger);
@@ -264,7 +265,7 @@ button:active {
   background: var(--danger-hover);
 }
 
-/* BOTÃO EDITAR CATEGORIA */
+/* EDITAR CATEGORIA */
 
 .btn-editar-categoria {
   background: var(--primary);
@@ -274,7 +275,7 @@ button:active {
   background: var(--primary-hover);
 }
 
-/* BOTÃO EXCLUIR CATEGORIA */
+/* EXCLUIR CATEGORIA */
 
 .btn-excluir-categoria {
   background: var(--danger);
@@ -293,7 +294,7 @@ select {
   border: 1px solid var(--border);
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  margin: 4px;
+  margin: 0;
   font-size: 14px;
   transition:
     border-color 0.2s,
@@ -381,10 +382,11 @@ tbody tr:hover {
   background: var(--surface-2);
 }
 
-/* ESTOQUE (badges tipo pill) */
+/* ESTOQUE */
 
 .critico,
-.normal {
+.normal,
+.inativo {
   display: inline-block;
   vertical-align: middle;
   line-height: 1.4;
@@ -404,6 +406,13 @@ tbody tr:hover {
   color: var(--status-ok-text);
 }
 
+/* PRODUTO INATIVO */
+
+.inativo {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
 /* FORMULÁRIOS */
 
 form {
@@ -418,6 +427,10 @@ form {
 
 td:last-child {
   white-space: nowrap;
+}
+
+td:last-child button {
+  margin: 2px;
 }
 
 /* TELAS */
