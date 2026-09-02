@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS produtos (
     codigo_barras VARCHAR(100) NOT NULL UNIQUE,
     preco_venda NUMERIC(10, 2) NOT NULL,
     id_categoria INTEGER NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT fk_produtos_categoria
         FOREIGN KEY (id_categoria)
